@@ -16,7 +16,6 @@ enableRobotsTXT = true
   tocopen = false
   defaultTheme = "auto"
   env = "production"
-  customCSS = ["css/custom.css"]
 
 [outputs]
   home = ["HTML", "RSS", "JSON"]
