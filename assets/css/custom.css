@@ -1,0 +1,7 @@
+/* 🔧 Remove PaperMod draft corner triangle completely */
+.draft,
+.page-draft-indicator,
+.single .page-header::after,
+.single .page-header::before {
+  display: none !important;
+}
