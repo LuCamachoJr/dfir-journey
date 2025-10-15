@@ -1,0 +1,9 @@
+/public/
+/resources/
+/hugo_cache/
+/hugo_stats.json
+node_modules/
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

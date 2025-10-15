@@ -1,0 +1,42 @@
+baseURL = "https://<YOUR_USERNAME>.github.io/<YOUR_REPO>/"
+title = "DFIR Journey"
+theme = "PaperMod"
+paginate = 7
+enableRobotsTXT = true
+
+[params]
+  author = "Luis Camacho Jr."
+  description = "AI-augmented DFIR workflows, labs, and reports."
+  ShowReadingTime = true
+  ShowPostNavLinks = true
+  ShowBreadCrumb = true
+  ShowShareButtons = true
+  showtoc = true
+  tocopen = false
+  defaultTheme = "auto"
+  env = "production"
+
+[outputs]
+  home = ["HTML", "RSS", "JSON"]
+
+[permalinks]
+  posts = "/posts/:slug/"
+
+[markup]
+  [markup.goldmark.renderer]
+    unsafe = true
+
+[[menu.main]]
+  name = "Home"
+  url  = "/"
+  weight = 1
+
+[[menu.main]]
+  name = "Posts"
+  url  = "/posts/"
+  weight = 2
+
+[[menu.main]]
+  name = "About"
+  url  = "/about/"
+  weight = 3
