@@ -16,6 +16,7 @@ enableRobotsTXT = true
   tocopen = false
   defaultTheme = "auto"
   env = "production"
+  disableSpecial1stPost = true
 
 [outputs]
   home = ["HTML", "RSS", "JSON"]
