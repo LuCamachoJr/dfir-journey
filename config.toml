@@ -1,4 +1,4 @@
-baseURL = "https://<YOUR_USERNAME>.github.io/<YOUR_REPO>/"
+baseURL = "https://LuCamachoJr.github.io/dfir-journey/"
 title = "DFIR Journey"
 theme = "PaperMod"
 [pagination]
