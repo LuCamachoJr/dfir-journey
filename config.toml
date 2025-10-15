@@ -1,7 +1,8 @@
 baseURL = "https://<YOUR_USERNAME>.github.io/<YOUR_REPO>/"
 title = "DFIR Journey"
 theme = "PaperMod"
-paginate = 7
+[pagination]
+  pagerSize = 7
 enableRobotsTXT = true
 
 [params]
