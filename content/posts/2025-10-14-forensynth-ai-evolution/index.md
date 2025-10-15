@@ -1,16 +1,16 @@
 +++
-title = "AI-Augmented DFIR: From EVTX Hunts to Recruiter-Ready Reports"
-date = 2025-10-11T00:00:00Z
-draft = true
-description = "Chainsaw (Sigma) → SwiftOnSecurity Sysmon → PS simulator → Python LLM summarizer = faster, higher-quality DFIR reports."
-tags = ["DFIR", "EVTX", "Sigma", "Sysmon", "LLM", "Chainsaw"]
+title = "ForenSynth AI Evolution — From Chainsaw to Visual DFIR Reports"
+date = 2025-10-14T00:00:00Z
+draft = false
+description = "Tracing the evolution of ForenSynth AI from the original Chainsaw summarizer to the Visual DFIR reporting engine powered by GPT-5."
+tags = ["DFIR", "AI", "Chainsaw", "Sigma", "Forensics", "LLM"]
 categories = ["DFIR Journey"]
 author = "Luis Camacho Jr."
-slug = "ai-augmented-dfir-evtx-to-report"
+slug = "forensynth-ai-evolution"
 showToc = true
-canonicalURL = ""
+canonicalURL = "https://LuCamachoJr.github.io/dfir-journey/posts/forensynth-ai-evolution/"
 resources = []
-cover = { image = "", caption = "", alt = "", relative = true }
+cover = { image = "", caption = "ForenSynth AI — Visual DFIR Reporting", alt = "DFIR report automation pipeline diagram", relative = true }
 +++
 
 > **Automation shouldn’t replace judgment; it should buy you time to use it.**
