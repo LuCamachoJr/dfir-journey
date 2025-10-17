@@ -8,7 +8,11 @@ categories = ["DFIR Journey"]
 author = "Luis Camacho Jr."
 slug = "lab-setup-telemetry-guide"
 showToc = true
-cover = { image = "", caption = "From telemetry to triage: Sysmon → Chainsaw → Sigma", alt = "DFIR Lab Telemetry Guide", relative = true }
+[cover]
+image = "images/og_threeup_branded.png"  # or run-summary_og_nocrop_branded.png
+alt = "ForenSynth run summary, KPIs, and simulator — DFIR Journey"
+relative = true
+hiddenInSingle = false    # << hide cover on the post page
 +++
 
 > **Goal:** A reproducible DFIR lab pipeline: **Sysmon** emits clean telemetry → **Chainsaw** hunts EVTX with **Sigma** → JSON detections flow into **ForenSynth AI**.
@@ -61,7 +65,9 @@ Example (randomized):
   -OfflineMode Auto `
   -DetectionsMax 1700
 ```
-
+{{< figure src="images/simulator_branded.png"
+           alt="Random DFIR Noise Simulator"
+           caption="Simulator producing high-signal Sysmon events" >}}
 ---
 
 ## 4) Export EVTX for Hunting
