@@ -57,5 +57,27 @@ One report per run: executive summary, technique table, evidence snippets, IOC l
 chainsaw hunt /path/to/evtx --rules /path/to/sigma/rules --mapping /path/to/sigma-event-logs-all.yml --json out/detections.json
 ```
 
+## v2.3.4 — Polish & Reporting Pass (2025-11-02)
+
+- Promoted the “polish” pipeline (`v2.3.4`) as the main ForenSynth AI flow.
+- Added **donut + heatmap visuals** in the HTML report:
+  - Donuts mapped to MITRE ATT&CK phases (Execution, Persistence, Discovery, Lateral, Defense Evasion, etc.).
+  - Heatmap by EventID with a small footnote explaining IDs (1 = process create, 13 = registry, 4104 = PowerShell ScriptBlock, etc.).
+- Introduced a **sampling governor** for high-volume hunts:
+  - Flags like `--limit-detections` and `--sample-step` let me cap to ~1k representative detections while still preserving campaign structure.
+  - Dramatically reduces runtime and cost for 2k–3k+ detection hunts.
+- Improved **Evidence Appendix**:
+  - Exportable CSV via `--export-evidence-csv`.
+  - Cleaner “Entities & Scope” and MITRE-aligned phase counts so responders can skim scope at a glance.
+- Tightened **cost reporting**:
+  - HTML report now surfaces real OpenAI usage totals (input/output tokens + cost) instead of rough estimates.
+- This whole v2.3.4 cycle came from iterating on logs from a single HTB “Windows Event Logs & Finding Evil” module and vibe-coding the tool into existence with ChatGPT, on top of my DFIR + coding fundamentals.
+
+**Live sample report**
+
+- 👉 [View the v2.3.4 ForenSynth AI sample report](/forensynth/2025-11-02-polish-run/)
+- Source HTML is still kept in the code repo under:
+  `examples/2025-11-2-polish-run/forensynth_report_2025-11-02.html`
+
 ## Acknowledgments
 - Chainsaw (Sigma), SwiftOnSecurity Sysmon config, and open-source DFIR community.
