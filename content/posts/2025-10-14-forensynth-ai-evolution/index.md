@@ -75,7 +75,7 @@ chainsaw hunt /path/to/evtx --rules /path/to/sigma/rules --mapping /path/to/sigm
 
 **Live sample report**
 
-- 👉 [View the v2.3.4 ForenSynth AI sample report](/forensynth/2025-11-02-polish-run/)
+- 👉 [View the v2.3.4 ForenSynth AI sample report](/dfir-journey/forensynth/2025-11-02-polish-run/)
 - Source HTML is still kept in the code repo under:
   `examples/2025-11-2-polish-run/forensynth_report_2025-11-02.html`
 
