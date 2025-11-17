@@ -18,3 +18,7 @@ I use this space to turn real lab work into public artifacts: write-ups, screens
 
 
 
+\- 📅 \*\*DFIR Journey Timeline\*\* – full running log of labs, tools, and milestones: \[View the timeline]({{< ref "timeline.md" >}})
+
+
+
