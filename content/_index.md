@@ -19,7 +19,7 @@ Welcome to \*\*DFIR Journey\*\* — my ongoing lab notebook as I transition into
 
 - 🧪 **Simulation tooling:** A Random DFIR Noise Simulator to create realistic, safe Windows activity for tuning detections.
 
-- 📅 **DFIR Journey Timeline** – full running log of labs, tools, and milestones: [View the timeline](https://lucamachojr.github.io/dfir-journey/timeline/)
+- 📅 **DFIR Journey Timeline** – full running log of labs, tools, and milestones: [View the timeline]({{< relref "timeline.md" >}})
 
 
 I use this space to turn real lab work into public artifacts: write-ups, screenshots, and GitHub repos that show how I think, not just what I’ve read.
