@@ -5,4 +5,80 @@
 &lt;p&gt;- Designing and shipping my own tools and workflows, including **ForenSynth AI**.&lt;/p&gt;
 &lt;p&gt;### How I build&lt;/p&gt;
 &lt;p&gt;Most of the code behind these projects was created using an AI-assisted workflow:&lt;/p&gt;
-&lt;p&gt;- I design the **pipeline, logic, and requirements**.&lt;/p&gt;</description></item></channel></rss>
+&lt;p&gt;- I design the **pipeline, logic, and requirements**.&lt;/p&gt;</description></item><item><title>DFIR Journey Timeline</title><link>https://LuCamachoJr.github.io/dfir-journey/timeline/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://LuCamachoJr.github.io/dfir-journey/timeline/</guid><description>&lt;h1 id="dfir-journey--timeline"&gt;DFIR Journey — Timeline&lt;/h1&gt;
+&lt;p&gt;A chronological view of key milestones, labs, and write-ups.&lt;br&gt;
+The home page shows latest posts first — this page keeps the &lt;strong&gt;story arc in order&lt;/strong&gt;.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id="2025"&gt;2025&lt;/h2&gt;
+&lt;h3 id="november-2025"&gt;November 2025&lt;/h3&gt;
+&lt;h4 id="2025-11-02--forensynth-ai-v234-polish-run"&gt;2025-11-02 — ForenSynth AI v2.3.4 “Polish” Run&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;Turned the original Chainsaw + Sigma EVTX summarizer into a &lt;strong&gt;visual, analyst-friendly DFIR report engine&lt;/strong&gt;.&lt;/li&gt;
+&lt;li&gt;Added:
+&lt;ul&gt;
+&lt;li&gt;Donut + heatmap visuals mapped to MITRE ATT&amp;amp;CK phases.&lt;/li&gt;
+&lt;li&gt;Evidence CSV export for quick pivoting in Excel/SIEM.&lt;/li&gt;
+&lt;li&gt;Micro-sampling “governor” to handle &lt;strong&gt;2k–3k+ detections&lt;/strong&gt; at reasonable cost/latency.&lt;/li&gt;
+&lt;li&gt;Real OpenAI billing usage wired into the footer for honest cost reporting.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Live report (HTML):&lt;br&gt;
+👉 &lt;a href="https://LuCamachoJr.github.io/dfir-journey/forensynth/2025-11-02-polish-run/"&gt;ForenSynth AI — DFIR Report (2025-11-02 Polish Run)&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Code &amp;amp; examples:&lt;br&gt;
+👉 &lt;a href="https://github.com/LuCamachoJr/ForenSynth-AI"&gt;ForenSynth AI on GitHub&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id="october-2025"&gt;October 2025&lt;/h3&gt;
+&lt;h4 id="2025-10-25--post-hunt-sampling-poc"&gt;2025-10-25 — Post-Hunt Sampling (POC)&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;Realized that &lt;strong&gt;full micro-summaries on 2k–3k detections&lt;/strong&gt; can be slow and expensive.&lt;/li&gt;
+&lt;li&gt;Implemented &lt;strong&gt;post-hunt sampling&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;--limit-detections&lt;/code&gt; and &lt;code&gt;--sample-step&lt;/code&gt; to cap and stratify detections.&lt;/li&gt;
+&lt;li&gt;Example: &lt;code&gt;2705 → 902&lt;/code&gt; sampled detections with stable narrative quality.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;This became the foundation for the micro “governor” used in v2.3.4.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="2025-10-24--forensynth-ai-v233-visual-refresh"&gt;2025-10-24 — ForenSynth AI v2.3.3 (Visual Refresh)&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;First full version with:
+&lt;ul&gt;
+&lt;li&gt;HTML &lt;strong&gt;charts&lt;/strong&gt; (bars + donuts) for phase / event distribution.&lt;/li&gt;
+&lt;li&gt;Evidence appendix and CSV exports.&lt;/li&gt;
+&lt;li&gt;Executable executive summary suitable for &lt;strong&gt;copy/paste into IR reports&lt;/strong&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Used against multi-day Windows EVTX logs to generate a narrative of:
+&lt;ul&gt;
+&lt;li&gt;Encoded PowerShell abuse&lt;/li&gt;
+&lt;li&gt;LOLBINs (rundll32/regsvr32)&lt;/li&gt;
+&lt;li&gt;Scheduled tasks, Run keys, and account creation&lt;/li&gt;
+&lt;li&gt;Defense evasion and log tampering.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="2025-10-22--random-dfir-noise-simulator-powershell"&gt;2025-10-22 — Random DFIR Noise Simulator (PowerShell)&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;Built a &lt;strong&gt;PowerShell “noise generator”&lt;/strong&gt; to create realistic-but-controlled Windows:
+&lt;ul&gt;
+&lt;li&gt;Process creation events&lt;/li&gt;
+&lt;li&gt;PowerShell activity&lt;/li&gt;
+&lt;li&gt;Account changes, scheduled tasks, etc.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Purpose:
+&lt;ul&gt;
+&lt;li&gt;Give Chainsaw/Sigma and ForenSynth AI &lt;strong&gt;repeatable, offline DFIR playground data&lt;/strong&gt;.&lt;/li&gt;
+&lt;li&gt;Avoid relying only on “real incidents” or synthetic toy logs.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Script + README live in the ForenSynth AI repo under &lt;code&gt;examples/&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="early-october-2025--windows-event-logs--finding-evil-htb"&gt;Early October 2025 — Windows Event Logs &amp;amp; Finding Evil (HTB)&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;Worked through an HTB module on &lt;strong&gt;Windows Event Logs &amp;amp; Finding Evil&lt;/strong&gt;.&lt;/li&gt;
+&lt;li&gt;Pain point: manually pivoting from raw EVTX → human-readable narrative.&lt;/li&gt;
+&lt;li&gt;This is where the core idea appeared:
+&lt;blockquote&gt;
+&lt;p&gt;“What if Chainsaw + Sigma results could flow into an AI that writes a DFIR-style executive report for me?”&lt;/p&gt;</description></item></channel></rss>
