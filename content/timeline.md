@@ -23,7 +23,7 @@ The home page shows latest posts first — this page keeps the **story arc in or
   - Micro-sampling “governor” to handle **2k–3k+ detections** at reasonable cost/latency.
   - Real OpenAI billing usage wired into the footer for honest cost reporting.
 - Live report (HTML):  
-  👉 [ForenSynth AI — DFIR Report (2025-11-02 Polish Run)](/forensynth/2025-11-02-polish-run/)  
+  👉 [ForenSynth AI — DFIR Report (2025-11-02 Polish Run)](https://lucamachojr.github.io/dfir-journey/forensynth/2025-11-02-polish-run/)  
 - Code & examples:  
   👉 [ForenSynth AI on GitHub](https://github.com/LuCamachoJr/ForenSynth-AI)
 
