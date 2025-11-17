@@ -5,7 +5,7 @@ date: 2025-01-01T00:00:00Z
 
 
 
-Welcome to \*\*DFIR Journey\*\* — my ongoing lab notebook as I transition into Digital Forensics \& Incident Response.
+Welcome to **DFIR Journey** — my ongoing lab notebook as I transition into Digital Forensics \& Incident Response.
 
 
 
