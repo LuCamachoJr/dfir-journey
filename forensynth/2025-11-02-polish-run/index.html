@@ -5,76 +5,243 @@
 <title>ForenSynth AI — DFIR Report</title>
 <style>
 :root { --fg:#0e1628; --muted:#66728a; --bg:#ffffff; --edge:#eef2f8; --accent:#0a69ff; }
-html,body { margin:0; padding:0; }
-body { color:var(--fg); background:var(--bg); font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, Arial; }
-.header { padding:24px 24px 8px; border-bottom:1px solid var(--edge); }
-.h1 { font-size:28px; font-weight:800; margin:0 0 4px; }
-.sub { color:var(--muted); font-size:14px; }
-.container { max-width:1024px; margin:0 auto; padding:0 24px 48px; }
-.toc { margin:16px 0 24px; padding:12px; background:#f6f9ff; border:1px solid var(--edge); border-radius:8px; }
-.section h2 { font-size:20px; margin-top:28px; border-bottom:1px solid var(--edge); padding-bottom:4px; }
-pre, code { background:#f7f9fc; border:1px solid var(--edge); border-radius:6px; }
-pre { padding:12px; overflow:auto; }
-.footer { margin-top:36px; padding:16px; border-top:1px solid var(--edge); font-size:13px; color:var(--muted); display:flex; justify-content:space-between; align-items:center; }
-.brand { opacity:0.85; }
-.strip { margin-top:18px; height:8px; background: linear-gradient(90deg, #d6e6ff 0%, #0a69ff 50%, #001A72 100%); border-radius:4px; }
-.kpis { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:12px; margin:16px 0; }
-.kpi { background:#f7faff; border:1px solid var(--edge); border-radius:10px; padding:12px; }
-.kpi .label { color:var(--muted); font-size:12px; }
-.kpi .value { font-size:18px; font-weight:700; }
-.canvas-wrap { margin:12px 0 0; border:1px solid var(--edge); border-radius:8px; padding:8px; }
-.note { color:var(--muted); font-size:12px; margin-top:6px; }
 
-.legend { margin-top:10px; display:grid; grid-template-columns:1fr; gap:4px; font-size:13px; color:#333; }
-.legend .row { display:flex; align-items:center; gap:8px; }
-.legend .swatch { width:10px; height:10px; border-radius:50%; display:inline-block; border:1px solid #ccd; }
-.caption { color:#66728a; font-size:12px; margin-top:6px; }
-.footnote { color:#66728a; font-size:12px; margin-top:6px; }
-.charts { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:16px; margin:16px 0 4px; }
-.card { background:#f7faff; border:1px solid #eef2f8; border-radius:10px; padding:12px; }
-.card h3 { margin:0 0 8px; font-size:16px; }
-  
-/* Keep the main report nicely centered */
+/* Global layout: no page-wide horizontal scroll */
+html, body {
+  margin: 0;
+  padding: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  color: var(--fg);
+  background: var(--bg);
+  font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, Arial;
+}
+
+.header {
+  padding: 24px 24px 8px;
+  border-bottom: 1px solid var(--edge);
+}
+
+.h1 {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0 0 4px;
+}
+
+.sub {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.container {
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 0 24px 48px;
+  box-sizing: border-box;
+}
+
+.toc {
+  margin: 16px 0 24px;
+  padding: 12px;
+  background: #f6f9ff;
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+}
+
+.section h2 {
+  font-size: 20px;
+  margin-top: 28px;
+  border-bottom: 1px solid var(--edge);
+  padding-bottom: 4px;
+}
+
+pre,
+code {
+  background: #f7f9fc;
+  border: 1px solid var(--edge);
+  border-radius: 6px;
+  max-width: 100%;
+}
+
+/* Long text wraps instead of stretching page width */
+pre {
+  padding: 12px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+.footer {
+  margin-top: 36px;
+  padding: 16px;
+  border-top: 1px solid var(--edge);
+  font-size: 13px;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand {
+  opacity: 0.85;
+}
+
+.strip {
+  margin-top: 18px;
+  height: 8px;
+  background: linear-gradient(90deg, #d6e6ff 0%, #0a69ff 50%, #001A72 100%);
+  border-radius: 4px;
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.kpi {
+  background: #f7faff;
+  border: 1px solid var(--edge);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.kpi .label {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.kpi .value {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* Heatmap/chart container – keep it inside viewport */
+.canvas-wrap {
+  margin: 12px 0 0;
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+  padding: 8px;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.canvas-wrap canvas {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}
+
+.note {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.legend {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px;
+  font-size: 13px;
+  color: #333;
+}
+
+.legend .row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend .swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  border: 1px solid #ccd;
+}
+
+.caption {
+  color: #66728a;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.footnote {
+  color: #66728a;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+/* Card grid for donuts – keep responsive */
+.charts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 16px;
+  margin: 16px 0 4px;
+  max-width: 100%;
+}
+
+.card {
+  background: #f7faff;
+  border: 1px solid #eef2f8;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.card h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+/* Keep the main report nicely centered (for future use if needed) */
 .report-root {
   max-width: 1100px;
   margin: 0 auto;
   padding: 1.5rem;
 }
 
-/* Make canvases (donuts + heatmap) responsive */
+/* Make canvases (donuts + heatmap) responsive in flex layouts */
 .chart-row {
-   display: flex;
-   flex-wrap: wrap;
-   gap: 1.5rem;
- }
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
 
- .chart-card {
-   flex: 1 1 260px;
-   min-width: 260px;
-   max-width: 100%;
- }
+.chart-card {
+  flex: 1 1 260px;
+  min-width: 260px;
+  max-width: 100%;
+}
 
 .chart-card canvas {
   width: 100%;
-   max-width: 100%;
-  height: auto;  }
+  max-width: 100%;
+  height: auto;
+}
 
 /* Local horizontal scroll for big tables/sections */
- .scroll-x {
+.scroll-x {
   max-width: 100%;
   overflow-x: auto;
   padding-bottom: 0.25rem;
- }
+}
 
 .scroll-x table {
-  min-width: 600px; /* or whatever your widest table needs */
+  min-width: 600px; /* adjust if needed */
   border-collapse: collapse;
- }
+}
 
 .scroll-x th,
 .scroll-x td {
-   padding: 0.3rem 0.5rem;
-  white-space: nowrap;  }
+  padding: 0.3rem 0.5rem;
+  white-space: nowrap;
+}
 </style>
 </head>
 <body>
@@ -84,7 +251,15 @@ pre { padding:12px; overflow:auto; }
     <div class="strip"></div>
   </div>
   <div class="container">
-    <div class="toc"><strong>Contents</strong><ul><li><a href="#kpis">Key Metrics</a></li><li><a href="#heat">Detection Heatmap</a></li><li><a href="#viz">At a Glance</a></li><li><a href="#exec">Executive Report</a></li></ul></div>
+    <div class="toc">
+      <strong>Contents</strong>
+      <ul>
+        <li><a href="#kpis">Key Metrics</a></li>
+        <li><a href="#heat">Detection Heatmap</a></li>
+        <li><a href="#viz">At a Glance</a></li>
+        <li><a href="#exec">Executive Report</a></li>
+      </ul>
+    </div>
     <div id="kpis" class="kpis">
       <div class="kpi"><div class="label">Detections</div><div class="value">1000</div></div>
       <div class="kpi"><div class="label">Chunk Model</div><div class="value">gpt-5-mini</div></div>
@@ -106,26 +281,53 @@ pre { padding:12px; overflow:auto; }
       <div class="charts">
         <div class="card">
           <div class="scroll-x">
-          <h3>By Phase (MITRE-mapped)</h3>
-          <canvas id="donut_phase" width="280" height="180"></canvas>
-          <div class="legend"><div class="row"><span class="swatch" style="background:#0a69ff"></span><span>Execution: <strong>635</strong></span></div><div class="row"><span class="swatch" style="background:#154cbd"></span><span>Unmapped/Multiple: <strong>201</strong></span></div><div class="row"><span class="swatch" style="background:#1e3d8a"></span><span>Defense Evasion: <strong>64</strong></span></div><div class="row"><span class="swatch" style="background:#27405e"></span><span>Discovery: <strong>53</strong></span></div><div class="row"><span class="swatch" style="background:#5a7bd7"></span><span>Persistence: <strong>34</strong></span></div><div class="row"><span class="swatch" style="background:#98b3ff"></span><span>Lateral Movement: <strong>13</strong></span></div><div class="row"><span class="swatch" style="background:#3a9ad9"></span><span>Credentials: <strong>0</strong></span></div><div class="row"><span class="swatch" style="background:#7bc8f6"></span><span>Exfiltration: <strong>0</strong></span></div></div>
+            <h3>By Phase (MITRE-mapped)</h3>
+            <canvas id="donut_phase" width="280" height="180"></canvas>
+            <div class="legend">
+              <div class="row"><span class="swatch" style="background:#0a69ff"></span><span>Execution: <strong>635</strong></span></div>
+              <div class="row"><span class="swatch" style="background:#154cbd"></span><span>Unmapped/Multiple: <strong>201</strong></span></div>
+              <div class="row"><span class="swatch" style="background:#1e3d8a"></span><span>Defense Evasion: <strong>64</strong></span></div>
+              <div class="row"><span class="swatch" style="background:#27405e"></span><span>Discovery: <strong>53</strong></span></div>
+              <div class="row"><span class="swatch" style="background:#5a7bd7"></span><span>Persistence: <strong>34</strong></span></div>
+              <div class="row"><span class="swatch" style="background:#98b3ff"></span><span>Lateral Movement: <strong>13</strong></span></div>
+              <div class="row"><span class="swatch" style="background:#3a9ad9"></span><span>Credentials: <strong>0</strong></span></div>
+              <div class="row"><span class="swatch" style="background:#7bc8f6"></span><span>Exfiltration: <strong>0</strong></span></div>
+            </div>
           </div>
         </div>
         <div class="card">
           <h3>Top Event IDs</h3>
           <canvas id="donut_eid" width="280" height="180"></canvas>
-          <div class="legend"><div class="row"><span class="swatch" style="background:#0a69ff"></span><span>1: <strong>839</strong></span></div><div class="row"><span class="swatch" style="background:#154cbd"></span><span>4104: <strong>47</strong></span></div><div class="row"><span class="swatch" style="background:#1e3d8a"></span><span>13: <strong>33</strong></span></div><div class="row"><span class="swatch" style="background:#27405e"></span><span>11: <strong>31</strong></span></div><div class="row"><span class="swatch" style="background:#5a7bd7"></span><span>4688: <strong>15</strong></span></div><div class="row"><span class="swatch" style="background:#98b3ff"></span><span>4634: <strong>13</strong></span></div><div class="row"><span class="swatch" style="background:#3a9ad9"></span><span>20: <strong>6</strong></span></div><div class="row"><span class="swatch" style="background:#7bc8f6"></span><span>?: <strong>5</strong></span></div></div>
+          <div class="legend">
+            <div class="row"><span class="swatch" style="background:#0a69ff"></span><span>1: <strong>839</strong></span></div>
+            <div class="row"><span class="swatch" style="background:#154cbd"></span><span>4104: <strong>47</strong></span></div>
+            <div class="row"><span class="swatch" style="background:#1e3d8a"></span><span>13: <strong>33</strong></span></div>
+            <div class="row"><span class="swatch" style="background:#27405e"></span><span>11: <strong>31</strong></span></div>
+            <div class="row"><span class="swatch" style="background:#5a7bd7"></span><span>4688: <strong>15</strong></span></div>
+            <div class="row"><span class="swatch" style="background:#98b3ff"></span><span>4634: <strong>13</strong></span></div>
+            <div class="row"><span class="swatch" style="background:#3a9ad9"></span><span>20: <strong>6</strong></span></div>
+            <div class="row"><span class="swatch" style="background:#7bc8f6"></span><span>?: <strong>5</strong></span></div>
+          </div>
         </div>
         <div class="card">
           <h3>By Day (UTC)</h3>
           <canvas id="donut_day" width="280" height="180"></canvas>
-          <div class="legend"><div class="row"><span class="swatch" style="background:#0a69ff"></span><span>2025-10-10: <strong>210</strong></span></div><div class="row"><span class="swatch" style="background:#154cbd"></span><span>2025-10-25: <strong>186</strong></span></div><div class="row"><span class="swatch" style="background:#1e3d8a"></span><span>2025-10-24: <strong>111</strong></span></div><div class="row"><span class="swatch" style="background:#27405e"></span><span>2025-10-07: <strong>94</strong></span></div><div class="row"><span class="swatch" style="background:#5a7bd7"></span><span>2025-10-13: <strong>93</strong></span></div><div class="row"><span class="swatch" style="background:#98b3ff"></span><span>2025-10-05: <strong>55</strong></span></div><div class="row"><span class="swatch" style="background:#3a9ad9"></span><span>2025-10-15: <strong>41</strong></span></div><div class="row"><span class="swatch" style="background:#7bc8f6"></span><span>2025-10-14: <strong>33</strong></span></div></div>
+          <div class="legend">
+            <div class="row"><span class="swatch" style="background:#0a69ff"></span><span>2025-10-10: <strong>210</strong></span></div>
+            <div class="row"><span class="swatch" style="background:#154cbd"></span><span>2025-10-25: <strong>186</strong></span></div>
+            <div class="row"><span class="swatch" style="background:#1e3d8a"></span><span>2025-10-24: <strong>111</strong></span></div>
+            <div class="row"><span class="swatch" style="background:#27405e"></span><span>2025-10-07: <strong>94</strong></span></div>
+            <div class="row"><span class="swatch" style="background:#5a7bd7"></span><span>2025-10-13: <strong>93</strong></span></div>
+            <div class="row"><span class="swatch" style="background:#98b3ff"></span><span>2025-10-05: <strong>55</strong></span></div>
+            <div class="row"><span class="swatch" style="background:#3a9ad9"></span><span>2025-10-15: <strong>41</strong></span></div>
+            <div class="row"><span class="swatch" style="background:#7bc8f6"></span><span>2025-10-14: <strong>33</strong></span></div>
+          </div>
         </div>
       </div>
     </div>
 
     <div id="exec" class="section">
-      <h2>Executive & Findings</h2>
+      <h2>Executive &amp; Findings</h2>
       <pre># 🔍 ForenSynth AI — DFIR Summary (Two-Pass)
 
 - Generated: 2025-11-02T20:34:09.437010+00:00
@@ -298,7 +500,7 @@ Notable IOCs (if any)
 
 Executive bullets
 - Massive scripted activity: ~17 suspicious Base64-encoded PowerShell executions and ~9 non-interactive PowerShell process spawns observed between 2025-10-07T16:47:38 and 2025-10-07T17:06:33 (repeated bursts at ~16:47–16:48, ~16:52, ~16:59, final at 17:06:33).
-- Account persistence: 2 New User Created via net.exe at 2025-10-07T16:47:38 and a Member added to a Security‑Enabled Global Group (EventID 4728) at 2025-10-07T16:47:38 — same-second sequence.
+- Account persistence: 2 New User Created via net.exe at 2025-10-07T16:47:38 and a Member added to a Security-Enabled Global Group (EventID 4728) at 2025-10-07T16:47:38 — same-second sequence.
 - Discovery/lateral tooling: 4 net.exe executions (timestamps ~2025-10-07T16:52:13 and 16:59:02) and Local Accounts Discovery events at 16:52:12, 16:52:32, 16:59:01.
 - Early persistence/resource prep: Executable created by another executable at 2025-10-07T16:08:04 and Scheduled Task created at 2025-10-07T16:08:10.
 - Privilege/defense-evasion: Elevated system shell spawned at 2025-10-07T16:10:46 and a “Godmode” Sigma detection at 2025-10-07T16:08:17 (indicative of privilege/configuration manipulation).
@@ -318,26 +520,26 @@ Notable IOCs (if any)
 
 • Executive bullets
 - Time window: 2025-10-07T17:08:15 → 2025-10-07T18:15:40 UTC; activity clustered around 17:11–17:20 and 18:08–18:15.  
-- PowerShell mass activity: 14 Suspicious &quot;PowerShell with Base64&quot; events and 14 Non‑interactive PowerShell spawns (first PS non‑interactive 2025-10-07T17:08:15; last base64 PS 2025-10-07T18:15:40).  
+- PowerShell mass activity: 14 Suspicious &quot;PowerShell with Base64&quot; events and 14 Non-interactive PowerShell spawns (first PS non-interactive 2025-10-07T17:08:15; last base64 PS 2025-10-07T18:15:40).  
 - Net.exe usage: 5 Net.EXE executions (pairs at 17:11:12 and 17:20:15; additional at 18:08:39) used for discovery/management.  
 - Account reconnaissance: 4 Local Accounts Discovery events plus Whoami and Hostname executions (reconnaissance confirmed at 17:11, 17:20, 18:08–18:14).  
-- Persistence/lateral signals: New local user created via Net.EXE at 2025-10-07T18:08:39.593150Z (Net.EXE + account creation + SMB/discovery tags present).
+- Persistence/lateral signals: New local user created via Net.EXE at 2025-10-07T18:08:39.593150Z (Net.EXE + account creation + SMB/discovery tags present).  
 
 • Key TTPs
-- T1059.001 — PowerShell (non‑interactive execution, encoded/base64 scripts) — execution and potential post‑exploitation scripting.  
+- T1059.001 — PowerShell (non-interactive execution, encoded/base64 scripts) — execution and potential post-exploitation scripting.  
 - T1087.001 / T1033 — Local account discovery / user enumeration (Whoami, hostname, local account queries).  
 - T1136.001 — Create local account (New User Created via Net.EXE at 2025-10-07T18:08:39).  
-- T1021.002 / T1049 — SMB/remote service discovery and network discovery (Net.EXE used for discovery and potential lateral movement).
+- T1021.002 / T1049 — SMB/remote service discovery and network discovery (Net.EXE used for discovery and potential lateral movement).  
 
 • Notable IOCs (if any)
 - New local user creation: Net.EXE created account at 2025-10-07T18:08:39.593150Z (username not provided in alerts).  
 - Net.EXE executions: 2025-10-07T17:11:12.123029, 17:11:12.134105, 17:20:15.006571, 17:20:15.018066, 18:08:39.615360.  
-- PowerShell Base64 / non‑interactive bursts: 14 base64 execs + 14 non‑interactive spawns between 2025-10-07T17:08:15 and 2025-10-07T18:15:40 (no hashes or remote IPs provided).
+- PowerShell Base64 / non-interactive bursts: 14 base64 execs + 14 non-interactive spawns between 2025-10-07T17:08:15 and 2025-10-07T18:15:40 (no hashes or remote IPs provided).  
 
 Prioritized recommended actions (risk/effort — keep short)
 - High risk / Low effort: Isolate affected hosts with repeated PS &amp; Net.EXE activity; collect volatile artifacts (process command lines, parent PID, PowerShell decoded payloads) and disable newly created local account.  
 - High risk / Medium effort: Hunt for same PowerShell Base64 payloads and Net.EXE usage across environment (EDR, SIEM) and block encoded PowerShell execution policy where appropriate.  
-- Medium risk / Low effort: Review local and domain authentication logs for lateral movement around listed timestamps; change/rotate credentials for impacted machines.
+- Medium risk / Low effort: Review local and domain authentication logs for lateral movement around listed timestamps; change/rotate credentials for impacted machines.  
 
 ## Micro 5: Cluster Summary
 
@@ -405,40 +607,40 @@ Key TTPs (MITRE)
 - T1047 — Windows Management Instrumentation / WMIC process creation (2 events).  
 - T1053.005 — Scheduled Task creation via schtasks (2 events).  
 - T1021.002 — SMB / Windows admin shares (net.exe mount).  
-- T1082 — System information discovery (hostname, CMD output redirect).
+- T1082 — System information discovery (hostname, CMD output redirect).  
 
 Notable IOCs (if any)
 - No explicit IPs, domain names, file hashes or user accounts provided in alerts.  
 - Process/command IOCs observed: repeated powershell.exe with -EncodedCommand / base64 and non-interactive flags; regsvr32 anomalous invocation; wmic.exe process creation (EventID 4688); schtasks.exe creating scheduled tasks; net.exe mounting a share; CMD output redirect usage.  
-- Key timestamps for triage/correlation: 2025-10-10T22:49:59–22:50:19 UTC and 2025-10-10T22:53:39–22:53:48 UTC.
+- Key timestamps for triage/correlation: 2025-10-10T22:49:59–22:50:19 UTC and 2025-10-10T22:53:39–22:53:48 UTC.  
 
 ## Micro 8: Cluster Summary
 
 Executive bullets
-- High-volume encoded PowerShell activity (~28 encoded/Non‑interactive PowerShell events) in two quick bursts: 2025-10-10T22:55:12–22:55:27 UTC and 2025-10-10T23:02:47–23:02:51 UTC — strong execution + obfuscation signal (multiple Base64/encoded command detections).
-- Persistence/privilege/tool usage: Scheduled task creation via schtasks at 2025-10-10T22:55:27 UTC; WMIC process creation observed at 2025-10-10T22:55:26 and 2025-10-10T23:02:51; Regsvr32 anomalies at 22:55:26 and 23:02:51 — indicates attempts at persistence and defense‑evasion.
+- High-volume encoded PowerShell activity (~28 encoded/Non-interactive PowerShell events) in two quick bursts: 2025-10-10T22:55:12–22:55:27 UTC and 2025-10-10T23:02:47–23:02:51 UTC — strong execution + obfuscation signal (multiple Base64/encoded command detections).
+- Persistence/privilege/tool usage: Scheduled task creation via schtasks at 2025-10-10T22:55:27 UTC; WMIC process creation observed at 2025-10-10T22:55:26 and 2025-10-10T23:02:51; Regsvr32 anomalies at 22:55:26 and 23:02:51 — indicates attempts at persistence and defense-evasion.
 - Lateral movement and discovery: net.exe Windows share mounts at 2025-10-10T22:53:49 and 22:55:28; CMD shell output redirection and hostname queries at ~22:53:49, 22:55:16, 22:55:28, 23:02:48 — potential remote share access/credential use and environment reconnaissance.
-- Windows shell/scripting processes repeatedly spawned suspicious programs (events clustered ~22:55:26–27 and 23:02:51) consistent with orchestrated post‑compromise activity across standard system binaries.
+- Windows shell/scripting processes repeatedly spawned suspicious programs (events clustered ~22:55:26–27 and 23:02:51) consistent with orchestrated post-compromise activity across standard system binaries.
 
 Key TTPs
-- Execution / Obfuscated commands: T1059.001 (PowerShell — encoded/Base64), T1059.* (scripting interpreters), frequent non‑interactive child processes.
+- Execution / Obfuscated commands: T1059.001 (PowerShell — encoded/Base64), T1059.* (scripting interpreters), frequent non-interactive child processes.
 - Lateral movement &amp; discovery: T1021.002 (SMB/Windows admin shares via net.exe), T1082 (System Information Discovery — hostname/OS queries).
-- Persistence &amp; defense evasion: T1053.005 (Scheduled Task via schtasks), T1218.010 (regsvr32 abuse), T1047 (WMI/wmic), overall use of signed system utilities (living-off-the‑land).
+- Persistence &amp; defense evasion: T1053.005 (Scheduled Task via schtasks), T1218.010 (regsvr32 abuse), T1047 (WMI/wmic), overall use of signed system utilities (living-off-the-land).
 
 Notable IOCs (if any)
-- Process names repeatedly observed: powershell.exe (encoded/Base64, non‑interactive), net.exe (share mounts) — 2 mount events (22:53:49, 22:55:28), cmd.exe (output redirect) — 2 events (22:53:49, 22:55:28), schtasks.exe (task creation 22:55:27), wmic.exe (process create at 22:55:26 &amp; 23:02:51), regsvr32.exe anomalies (22:55:26 &amp; 23:02:51).
+- Process names repeatedly observed: powershell.exe (encoded/Base64, non-interactive), net.exe (share mounts) — 2 mount events (22:53:49, 22:55:28), cmd.exe (output redirect) — 2 events (22:53:49, 22:55:28), schtasks.exe (task creation 22:55:27), wmic.exe (process create at 22:55:26 &amp; 23:02:51), regsvr32.exe anomalies (22:55:26 &amp; 23:02:51).
 - No IP addresses, hostnames, or file hashes supplied in detections; relevant artifacts to collect: full PowerShell command lines (decoded), scheduled task XML, process trees/parent PIDs, SMB session/auth logs, and EDR telemetry for the timestamped bursts.
 
 Prioritized recommendations (by risk &amp; effort)
 - Immediate (High risk, low effort): Identify and isolate affected endpoint(s) showing the two PowerShell bursts; preserve volatile data (memory, running processes, process tree, PowerShell command logs) and pull full EDR/Windows event logs for the timestamps.
-- Contain &amp; investigate (High risk, medium effort): Terminate malicious processes if active, export and disable suspicious scheduled tasks, collect schtasks XML and WMIC command lines, review authentication logs for lateral logins to SMB shares, and hunt for same encoded PowerShell patterns enterprise‑wide.
+- Contain &amp; investigate (High risk, medium effort): Terminate malicious processes if active, export and disable suspicious scheduled tasks, collect schtasks XML and WMIC command lines, review authentication logs for lateral logins to SMB shares, and hunt for same encoded PowerShell patterns enterprise-wide.
 - Remediate &amp; prevent (Medium risk, higher effort): Restrict/whitelist regsvr32/wmic/schtasks usage via AppLocker or WDAC where possible, enforce/enable PowerShell logging (Module, Script_Block, Transcription) and block encoded command usage, rotate any exposed credentials and tighten SMB share permissions.
 
 ## Micro 9: Cluster Summary
 
 Executive bullets
 - Summary: 40 related events on 2025-10-10 between 2025-10-10T23:02:54 and 2025-10-10T23:15:19; activity clustered at ~23:02:54, ~23:06:33–23:06:46 and ~23:15:14–23:15:19.
-- PowerShell mass execution: ~27 PowerShell events (encoded/base64, non-interactive, child processes) in two bursts (~13 events at 23:06:33–23:06:42; ~14 events at 23:15:14–23:15:19) — high-likelihood of scripted/automated post‑exploitation.
+- PowerShell mass execution: ~27 PowerShell events (encoded/base64, non-interactive, child processes) in two bursts (~13 events at 23:06:33–23:06:42; ~14 events at 23:15:14–23:15:19) — high-likelihood of scripted/automated post-exploitation.
 - Persistence &amp; scheduled tasks: schtasks.exe used to create scheduled tasks (2 events: 23:02:54, 23:06:46) — probable persistence (also flagged privilege escalation).
 - Defense-evasion / signed-binary abuse: regsvr32 anomalies (2 events: 23:06:42, 23:15:19) and multiple detections of Windows shell/scripting spawning suspicious programs (3 events) indicating proxy execution.
 - Lateral movement &amp; discovery: net.exe used to mount shares twice (23:02:54, 23:06:46) and hostname/system-info discovery (t1082) observed twice; cmd output redirection seen twice — likely credential or data collection attempts.
@@ -447,7 +649,7 @@ Executive bullets
 Key TTPs
 - Execution / scripting: PowerShell encoded execution (T1059.001), CMD/shell scripting (T1059.005); WMI execution (T1047).
 - Persistence / scheduled task: Scheduled Task via schtasks.exe (T1053.005).
-- Defense evasion / signed‑binary proxy: regsvr32 and other t1218 family (T1218, T1218.010).
+- Defense evasion / signed-binary proxy: regsvr32 and other t1218 family (T1218, T1218.010).
 - Lateral movement / SMB: Windows share mount via net.exe (T1021.002).
 - Discovery: System information / hostname enumeration (T1082).
 
@@ -490,7 +692,7 @@ Executive bullets
 - Defense-evasion &amp; tampering: regsvr32 / rundll32 invocations at 2025-10-10T23:23:04 and 2025-10-11T21:54:36; event log clearing/config change at 2025-10-11T21:54:16; CMD stream redirection at 2025-10-11T21:45:15 and 2025-10-10T23:23:16. Encoded PowerShell + non-interactive shells indicate obfuscation.
 - Immediate prioritized recommendations (risk ↓ / effort ↑):
   1) High risk / low effort: isolate affected host(s) showing clustered PowerShell + schtasks + Run key activity; preserve volatile data (command lines, process trees, scheduled task XML, registry hives, eventlog backups).
-  2) Medium risk / low‑medium effort: search SIEM/EDR for the listed timestamps, duplicate PowerShell base64 patterns, regsvr32/rundll32, WMIC spawns and schedule creation across estate; block or quarantine matching binaries/processes.
+  2) Medium risk / low-medium effort: search SIEM/EDR for the listed timestamps, duplicate PowerShell base64 patterns, regsvr32/rundll32, WMIC spawns and schedule creation across estate; block or quarantine matching binaries/processes.
   3) Medium risk / medium effort: disable/limit regsvr32/rundll32 and restrict PowerShell (ConstrainedLanguage, module logging, script block logging); remove suspicious scheduled tasks and Run key after collection.
   4) High effort / high risk: credential reset and lateral containment if WMIC/SMB mounts show account misuse; full host forensic triage if persistence confirmed.
 
@@ -607,7 +809,7 @@ Executive bullets
 - Two multi-event suspicious activity clusters:
   - Cluster A (2025-10-23 00:00–00:04 UTC): ~20+ PowerShell encoded / non-interactive spawns (Base64 patterns), remote thread creation (00:00:24), BITS file download to a suspicious folder (00:03:05), new RUN key (00:03:40), local account enumeration (00:03:42 &amp; 00:03:45), scheduled-task creation just prior (2025-10-22 23:57:49). Indicators show execution → persistence → discovery.
   - Cluster B (2025-10-24 15:28–15:52 UTC): scheduled task created (15:28:05), user logoff (15:50:54), eventlog clearing/config change (15:52:07), then ~5–7 encoded/non-interactive PowerShell events around 15:52.
-- Behavioral summary: repeated encoded PowerShell (non-interactive) used to spawn/shell to other binaries, BITS used to fetch payload, registry RUN key and scheduled tasks created for persistence, event log manipulation for defense evasion, and local account discovery — consistent with a post‑compromise automation chain.
+- Behavioral summary: repeated encoded PowerShell (non-interactive) used to spawn/shell to other binaries, BITS used to fetch payload, registry RUN key and scheduled tasks created for persistence, event log manipulation for defense evasion, and local account discovery — consistent with a post-compromise automation chain.
 
 Key TTPs (MITRE)
 - Command and scripting interpreter — PowerShell (T1059.001): repeated Base64/encoded executions and non-interactive spawns (multiple timestamps in both clusters).
@@ -627,7 +829,7 @@ Notable IOCs (if any)
 Prioritized recommendations (risk → effort)
 - High risk / Low effort: Isolate affected hosts from network, collect volatile artifacts (Process listings, PowerShell command lines, parent/child PIDs, scheduled task XML, RUN key values, BITS job list, Windows Event Log segments) and preserve disk images. (Immediate)
 - High risk / Medium effort: Hunt for matching Base64 PowerShell, scheduled tasks, RUN keys, BITS jobs, and event-log tamper on other hosts (central EDR/Log search across past 48–72 hrs); look for lateral movement indicators and reaped credentials.
-- Medium risk / Higher effort: Reconstruct decoded PowerShell payload(s), analyze downloaded files (sandbox + static), rotate high‑privilege credentials if discovery indicates account compromise, and remediate persistence (remove tasks/registry entries) after containment.
+- Medium risk / Higher effort: Reconstruct decoded PowerShell payload(s), analyze downloaded files (sandbox + static), rotate high-privilege credentials if discovery indicates account compromise, and remediate persistence (remove tasks/registry entries) after containment.
 
 ## Micro 17: Cluster Summary
 
@@ -643,7 +845,7 @@ Key TTPs
 - Persistence &amp; scheduling + discovery: T1547.001 Registry Run Keys (2 events), T1053.005 Schtasks (1 event), T1087.001 Local Account Discovery, T1082/T1033 system/hostname discovery.
 
 Notable IOCs (if any)
-- PowerShell: ~26 encoded/Non‑interactive exec events, first 2025-10-24T15:52:21, last 15:55:52 (EventID 1).
+- PowerShell: ~26 encoded/Non-interactive exec events, first 2025-10-24T15:52:21, last 15:55:52 (EventID 1).
 - Registry RUN keys: new RUN key -&gt; suspicious folder at 2025-10-24T15:52:33; PowerShell in Run keys at 2025-10-24T15:53:57 (EventID 13).
 - Proxy/signed-binary events: rundll32 at 2025-10-24T15:52:27; regsvr32 anomalies at 15:52:27 and 15:53:42; schtasks creation at 15:53:42.
 
@@ -797,9 +999,9 @@ Recommendations (prioritized by risk → effort)
 • Executive bullets
 - Repeated PowerShell execution and obfuscation (~20 events) from 2025-10-25T16:28 → 2025-10-28T16:29; spikes at 2025-10-26T00:06–00:08 and 2025-10-28T16:27–16:29 — includes encoded/base64 commands, aliasing, token obfuscation, and multiple non-interactive PowerShell spawns (EventID 1 / 4104).
 - Persistence artifacts created: CurrentVersion autorun modified (2025-10-25T16:28:43) and New RUN key pointing to suspicious folder (2025-10-26T00:07:52); Scheduled Task created (2025-10-26T00:01:04).
-- Discovery and reconnaissance: File/directory discovery scripts observed (2025-10-25T16:46:17 &amp; 16:46:20), Local Accounts discovery (2025-10-26T00:07:52), suspicious Get‑WmiObject usage (2025-10-26T03:17:07).
-- Defense‑evasion/log tampering: Eventlog clearing/config changes detected (2025-10-26T00:07:23; 2025-10-26T03:27:03 — snippet “clearkali”).
-- Living‑off‑the‑land downloads/execution: bitsadmin file download to suspicious folder (2025-10-26T00:07:44); rundll32 execution with uncommon DLL extension (2025-10-26T00:07:43–00:07:44); multiple Windows shell/scripting processes spawning suspicious programs (10-25 &amp; 10-26 timestamps).
+- Discovery and reconnaissance: File/directory discovery scripts observed (2025-10-25T16:46:17 &amp; 16:46:20), Local Accounts discovery (2025-10-26T00:07:52), suspicious Get-WmiObject usage (2025-10-26T03:17:07).
+- Defense-evasion/log tampering: Eventlog clearing/config changes detected (2025-10-26T00:07:23; 2025-10-26T03:27:03 — snippet “clearkali”).
+- Living-off-the-land downloads/execution: bitsadmin file download to suspicious folder (2025-10-26T00:07:44); rundll32 execution with uncommon DLL extension (2025-10-26T00:07:43–00:07:44); multiple Windows shell/scripting processes spawning suspicious programs (10-25 &amp; 10-26 timestamps).
 
 • Key TTPs
 - Execution/scripting: T1059.001 (PowerShell), T1059.005 (cmd), T1218.* (rundll32; T1218.011 observed).
@@ -808,18 +1010,18 @@ Recommendations (prioritized by risk → effort)
 
 • Notable IOCs (if any)
 - Registry/startup: CurrentVersion autorun modification (2025-10-25T16:28:43); New RUN key to suspicious folder (2025-10-26T00:07:52); Scheduled Task created 2025-10-26T00:01:04.
-- Execution/download artifacts &amp; strings: bitsadmin download to suspicious target folder (2025-10-26T00:07:44); rundll32 with uncommon DLL ext (2025-10-26T00:07:43–00:07:44); log‑clear string &quot;clearkali&quot; (2025-10-26T03:27:03); PowerShell snippets: token obfuscation &quot;Suspicious-But-Benign&quot; and multiple Set‑Alias entries (2025-10-26T00:07:36 &amp; 2025-10-28T16:29:31).
+- Execution/download artifacts &amp; strings: bitsadmin download to suspicious target folder (2025-10-26T00:07:44); rundll32 with uncommon DLL ext (2025-10-26T00:07:43–00:07:44); log-clear string &quot;clearkali&quot; (2025-10-26T03:27:03); PowerShell snippets: token obfuscation &quot;Suspicious-But-Benign&quot; and multiple Set-Alias entries (2025-10-26T00:07:36 &amp; 2025-10-28T16:29:31).
 
 • Prioritized recommendations (by risk &amp; effort)
-- Immediate — High risk / Low‑Medium effort: Isolate affected hosts (those with PS non‑interactive + registry/task changes + bitsadmin activity). Collect volatile evidence: PowerShell event logs (4104), process creation logs, scheduled tasks, Run keys, downloaded files; take forensic images before remediation.
+- Immediate — High risk / Low-Medium effort: Isolate affected hosts (those with PS non-interactive + registry/task changes + bitsadmin activity). Collect volatile evidence: PowerShell event logs (4104), process creation logs, scheduled tasks, Run keys, downloaded files; take forensic images before remediation.
 - Short term containment/hunt — High risk / Medium effort: Disable/remove suspicious Run keys and scheduled tasks; quarantine/delete downloaded payloads; reset/revoke local and privileged credentials seen in discovery; search estate for matching IOCs/PowerShell encoded patterns, &quot;clearkali&quot;, bitsadmin target path, and alias patterns; block bitsadmin/rundll32 misuse via EDR/AV/prevention rules.
 
 ## Micro 25: Cluster Summary
 
 • Executive bullets
-- Two focused attack clusters: 2025-10-28 16:29:35–16:29:53 (17 events: mass PowerShell encoded/non-interactive invocations, IEX obfuscation, Set‑Alias, wmic/rundll32 spawns, cmd redirect) and 2025-11-02 14:06:22–14:09:17 (22 events: scheduled task creation, autorun registry modifications, event-log clearing, repeated PowerShell encoded/non-interactive + Set‑Alias obfuscation).
+- Two focused attack clusters: 2025-10-28 16:29:35–16:29:53 (17 events: mass PowerShell encoded/non-interactive invocations, IEX obfuscation, Set-Alias, wmic/rundll32 spawns, cmd redirect) and 2025-11-02 14:06:22–14:09:17 (22 events: scheduled task creation, autorun registry modifications, event-log clearing, repeated PowerShell encoded/non-interactive + Set-Alias obfuscation).
 - Repeated encoded/Base64 and non-interactive PowerShell executions across both clusters (multiple EventID 1 and 4104 entries) — likely scripted remote/automated execution (T1059.001).
-- PowerShell obfuscation observed: IEX token obfuscation variants and alias creation (Set-Alias gcim/rcim/rcie/gcms) consistent with defense‑evasion (T1027 / T1027.009).
+- PowerShell obfuscation observed: IEX token obfuscation variants and alias creation (Set-Alias gcim/rcim/rcie/gcms) consistent with defense-evasion (T1027 / T1027.009).
 - Persistence and privilege techniques: Scheduled task created (2025-11-02T14:06:22; EventID 11, T1053.005) and Autorun key modifications at 2025-11-02T14:07:17 &amp; 14:07:43 (EventID 13, T1547.001).
 - Defense-evasion and cover-up: Event log clearing/config change at 2025-11-02T14:09:04 (T1070.001 / T1562.002); command-stream/cmd output redirection also present.
 - Lateral/legacy tool usage and risky process spawning: wmic.exe new-process at 2025-10-28T16:29:45 (T1047), rundll32 suspicious activity 16:29:47 (T1218.011), and Windows shell scripting spawning suspicious programs 16:29:48 (T1059.005/T1218).
