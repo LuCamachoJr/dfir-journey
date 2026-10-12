@@ -1,13 +1,12 @@
-baseURL = "https://LuCamachoJr.github.io/dfir-journey/"
+baseURL = "https://lucamachojr.github.io/dfir-journey/"
 title = "DFIR Journey"
-theme = "PaperMod"
 [pagination]
   pagerSize = 7
 enableRobotsTXT = true
 
 [params]
   author = "Luis Camacho Jr."
-  description = "AI-augmented DFIR workflows, labs, and reports."
+  description = "Evidence-first DFIR labs, tools, and analyst-reviewed AI reporting."
   ShowReadingTime = true
   ShowPostNavLinks = true
   ShowBreadCrumb = true
@@ -19,7 +18,7 @@ enableRobotsTXT = true
   disableSpecial1stPost = true
 
 [outputs]
-  home = ["HTML", "RSS", "JSON"]
+  home = ["HTML", "RSS"]
 
 [permalinks]
   posts = "/posts/:slug/"

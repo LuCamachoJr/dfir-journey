@@ -68,6 +68,12 @@ This site hosts those outputs (like the **2025-11-02 Polish run** report) so you
 
 ---
 
+## ForenSynth AI v2.4 beta
+
+The active beta adds normalized evidence, source hashes, explicit coverage, pending analyst-reviewed AI findings, STIX 2.1 export, and a local Windows/Linux desktop interface. Offline reporting is the default. Production effectiveness remains to be validated.
+
+[View the v2.4 source](https://github.com/LuCamachoJr/ForenSynth-AI/tree/feature/v2.4-evidence-beta). Earlier descriptions above refer to the historical v2.3.4 workflow.
+
 ## What you can expect next
 
 As this journey continues, I’ll keep:

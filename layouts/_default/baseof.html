@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="{{ .Description | default .Site.Params.description }}">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; img-src 'self' data:; script-src 'none'; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<title>{{ if not .IsHome }}{{ .Title }} · {{ end }}DFIR Journey</title>
+<link rel="canonical" href="{{ .Permalink }}"><link rel="stylesheet" href="{{ "css/journey.css" | relURL }}"><link rel="icon" href="{{ "favicon.svg" | relURL }}" type="image/svg+xml">
+<meta property="og:title" content="{{ .Title }} · DFIR Journey"><meta property="og:description" content="{{ .Description | default .Site.Params.description }}">
+{{ with .OutputFormats.Get "RSS" }}<link rel="alternate" type="application/rss+xml" title="DFIR Journey" href="{{ .Permalink }}">{{ end }}
+</head><body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><div class="shell nav"><a class="brand" href="{{ "" | relURL }}"><span class="brand-mark" aria-hidden="true">∴</span><span>DFIR <strong>Journey</strong><small>Human-led. Evidence-first.</small></span></a><nav aria-label="Main navigation"><a href="{{ "posts/" | relURL }}">Field notes</a><a href="{{ "timeline/" | relURL }}">Timeline</a><a href="{{ "about/" | relURL }}">About</a><a class="nav-source" href="https://github.com/LuCamachoJr/ForenSynth-AI">GitHub ↗</a></nav></div></header>
+<main id="main">{{ block "main" . }}{{ end }}</main>
+<footer class="site-footer shell"><div><a class="brand-text" href="{{ "" | relURL }}">DFIR Journey</a><p>Labs, tools, and lessons by Luis Camacho Jr.</p></div><div><a href="https://github.com/LuCamachoJr">GitHub</a><a href="https://www.linkedin.com/in/lcamachojr">LinkedIn</a><a href="{{ "index.xml" | relURL }}">RSS</a></div><small>Lab evidence is context, not a production incident claim.</small></footer>
+</body></html>
