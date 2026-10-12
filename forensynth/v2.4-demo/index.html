@@ -1,0 +1,61 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>ForenSynth Evidence Review</title><style>body{font:16px system-ui;max-width:1100px;margin:2rem auto;padding:0 1rem;background:#f6f8fc;color:#17243a}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:white;padding:2rem;border:1px solid #dde4ef;border-radius:12px}</style><body><pre># ForenSynth AI v2.4 — Evidence Review
+
+Case: synthetic-demo | Environment: simulation
+Generated: 2026-10-12T05:06:35.392572Z
+
+## Scope and coverage
+
+- Input records: 3; parsed: 3; rejected: 0
+- Detection matches: 3; unique retained events: 3
+- AI selected: 3; processed: 0; skipped: 0
+- Omitted from AI selection: 0; evidence exports retain all parsed records.
+- Observed hosts: LAB01
+- Event time range: 2026-10-12T04:00:00Z to 2026-10-12T04:00:00Z
+
+A detection match is not proof of compromise. No remediation is executed. AI findings remain pending analyst review.
+Evidence references establish traceability, not semantic correctness. Missing telemetry limits scope conclusions.
+
+## Findings
+
+### finding-05601b0fbb96e8e478405355
+Rule &#x27;PowerShell execution&#x27; matched 1 detection record(s).
+
+Classification: observed | Origin: deterministic | Review: pending
+Confidence: high — Count calculated from retained detections.
+Evidence: detection-82062b3ed92de9cd57b922a9-1
+Alternatives: A rule match may represent authorized or benign activity.
+
+### finding-b0963a9fa9f2a1c1da56636e
+Rule &#x27;Second rule same event&#x27; matched 1 detection record(s).
+
+Classification: observed | Origin: deterministic | Review: pending
+Confidence: high — Count calculated from retained detections.
+Evidence: detection-a9fa42845749338cc4511ef6-1
+Alternatives: A rule match may represent authorized or benign activity.
+
+### finding-46f1189f46e28e207f3f2799
+Rule &#x27;Rare service installations&#x27; matched 1 detection record(s).
+
+Classification: observed | Origin: deterministic | Review: pending
+Confidence: high — Count calculated from retained detections.
+Evidence: detection-3fc0cc7acc610e5c43a101be-1
+Alternatives: A rule match may represent authorized or benign activity.
+
+## ATT&amp;CK mappings
+
+Mappings are supplied Sigma tags, not confirmed adversary behavior.
+
+- T1059.001: 1 detection matches
+- T1543.003: 1 detection matches
+
+## Warnings
+
+- No ATT&amp;CK dataset supplied: technique tags remain in notes; no attack-pattern objects invented.
+
+## AI usage
+
+Mode: off
+Successful-response token usage: {}
+Estimated cost (configured rates): None
+Provider billing may differ, including calls without returned usage.
+</pre></body></html>
