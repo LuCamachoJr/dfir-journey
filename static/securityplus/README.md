@@ -4,7 +4,7 @@ Public, buildless Security+ SY0-701 practice app. Hosted by the parent repositor
 
 ## Features
 
-- 223 original items: 213 scenario questions and 10 PBQ simulations (four decisions per case). No recalled exam questions.
+- 264 original items available for new sessions: 249 scenario questions and 15 hands-on PBQs. Ten earlier case studies remain available for reviewing or resuming saved sessions.
 - Timed 90-question exams: D1 11, D2 20, D3 16, D4 25, D5 18; one PBQ per domain.
 - Random question/option order, unseen questions preferred, two completely fresh full exams supported by the bank.
 - Adaptive 20-question practice; targeted domain practice; PBQ workshop.
@@ -25,7 +25,9 @@ For real sign-in and cloud sync, configure a maintained identity provider and da
 
 ## Scoring method
 
-Practice readiness requires self-reported closed-book full exams with ≥70% first-seen questions. Targets: ≥85% overall, ≥75% every domain, ≥75% PBQs. Two most recent qualifying exams must meet targets for “Strong practice evidence.” These thresholds are unvalidated study heuristics, not pass predictions or conversions to CompTIA's 100–900 scale.
+The dashboard, Progress page and score report display the same recommendation. “Ready to schedule” uses the last 30 days. The two latest qualifying closed-book, timed full exams must each have at least 63 first-seen items and meet 85% overall, 75% in every domain and 75% on PBQs. A later weak closed-book exam flags review even if it used repeated items. Quiz evidence requires 80% on the last 20 first-seen adaptive or domain quiz items, or 75% on the last five first-seen workshop cases. Both must meet target if both samples are large enough. A smaller sample remains provisional. Historical case-study workshops do not count as hands-on evidence. If both qualifying exams used the earlier case format, a qualifying hands-on workshop is required. These locally chosen thresholds have no validated conversion to CompTIA scoring.
+
+The remaining fresh capacity respects domain and item quotas. The app flags when fewer than 63 first-seen items remain for a new local exam and directs the learner to independent material. It cannot observe exams or quizzes taken elsewhere.
 
 Priority = domain weight × smoothed gap × learner-estimated improvement potential. Smoothed gap is `1 − (points + 1)/(items + 2)` across the last three completed sessions. Potential defaults to 1; user can select 0.75 / 1 / 1.25. Adaptive allocation starts with two per domain and allocates ten more toward priority. Low sample sizes and repeated items are visible.
 
@@ -37,13 +39,14 @@ Requires no production packages or build step. Use an HTTP static server to prev
 node --test engine.test.mjs
 ```
 
-Tests cover blueprint consistency over 100 randomized exams, option-key remapping, uniqueness, coverage, two fresh exams, partial/exact scoring, adaptive allocation, and readiness exclusions. Manual browser verification covers profile/session/report interactions and responsive layout.
+Tests cover blueprint consistency over 1,000 randomized exams, option-key remapping, uniqueness, coverage, two fresh exams, partial/exact scoring, adaptive allocation, and readiness exclusions. The tests also exercise freshness limits, quiz and workshop corroboration, equivalent text and numeric entries, the firewall preview, and legacy profile backups.
 
-Questions in `questions.json` have domain/objective IDs, original stems, answer options, correct indices, and feedback for every option. PBQs add an exhibit and tasks. Preserve IDs across wording-only fixes; use new IDs for materially different assessment items so prior first-seen history remains meaningful. Public answer keys make this a learning app, not a proctored assessment.
+The original bank in `questions.json` and the additional bank in `applied.json` have domain/objective IDs, original stems, answer options, correct indices, and feedback for every option. Current PBQs use separate exhibit tables and configuration or evidence-entry fields. Menus and scenario choices are shuffled. Dates, event timelines and field order retain their operational meaning. Typed entries support explicit equivalent answers; number fields accept equivalent decimal and thousands formatting. The firewall preview computes the behavior of the entered rule against sample traffic. Preserve IDs across wording-only fixes; use new IDs for materially different assessment items so prior first-seen history remains meaningful. Public answer keys make this a learning app, not a proctored assessment.
 
 ## References
 
 - [CompTIA official SY0-701 objectives](https://assets.ctfassets.net/82ripq7fjls2/6TYWUym0Nudqa8nGEnegjG/0f9b974d3b1837fe85ab8e6553f4d623/CompTIA-Security-Plus-SY0-701-Exam-Objectives.pdf)
+- [CompTIA PBQ format and public simulation example](https://www.comptia.org/en-us/resources/test-policies/exam-development/performance-based-questions-explained/)
 - [NIST SP 800-61 Rev. 3](https://doi.org/10.6028/NIST.SP.800-61r3)
 - [NIST SP 800-207](https://doi.org/10.6028/NIST.SP.800-207)
 - [NIST SP 800-30 Rev. 1](https://doi.org/10.6028/NIST.SP.800-30r1)
