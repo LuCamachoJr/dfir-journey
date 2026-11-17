@@ -1,0 +1,2854 @@
+[
+  {
+    "id": "lab-cert-binding",
+    "domain": 1,
+    "objective": "1.4",
+    "topic": "TLS certificate selection",
+    "prompt": "Restore trusted HTTPS for the payroll portal. Complete the listener settings and record the certificate you would replace.",
+    "workspace": {
+      "title": "TLS listener settings",
+      "sources": [
+        {
+          "title": "Service ticket",
+          "columns": [
+            "Setting",
+            "Value"
+          ],
+          "rows": [
+            [
+              "Client URL",
+              "https://payroll.cedar.example"
+            ],
+            [
+              "Listener",
+              "HTTPS on port 443, certificate C-17"
+            ],
+            [
+              "Client trust store",
+              "Cedar Enterprise CA only"
+            ],
+            [
+              "Change date",
+              "15 June 2026. All four records are within their validity dates."
+            ]
+          ]
+        },
+        {
+          "title": "Certificate inventory",
+          "columns": [
+            "ID",
+            "DNS subject alternative name",
+            "Issuer",
+            "Matching private key on listener"
+          ],
+          "rows": [
+            [
+              "C-17",
+              "oldpay.cedar.example",
+              "Cedar Enterprise CA",
+              "Yes"
+            ],
+            [
+              "C-21",
+              "payroll.cedar.example",
+              "Lab CA",
+              "Yes"
+            ],
+            [
+              "C-24",
+              "payroll.cedar.example",
+              "Cedar Enterprise CA",
+              "Yes"
+            ],
+            [
+              "C-28",
+              "payroll.cedar.example",
+              "Cedar Enterprise CA",
+              "No"
+            ]
+          ]
+        }
+      ]
+    },
+    "tasks": [
+      {
+        "label": "Existing certificate ID",
+        "kind": "text",
+        "accept": [
+          "C-17"
+        ],
+        "rationale": "The current listener explicitly binds C-17."
+      },
+      {
+        "label": "Replacement certificate ID",
+        "kind": "text",
+        "accept": [
+          "C-24"
+        ],
+        "rationale": "C-24 matches the requested name, chains to a trusted CA and has its matching private key available."
+      },
+      {
+        "label": "DNS name for the post-change connection test",
+        "kind": "text",
+        "accept": [
+          "payroll.cedar.example",
+          "payroll.cedar.example."
+        ],
+        "rationale": "Test the exact hostname in the client URL so hostname validation is exercised."
+      },
+      {
+        "label": "Client validation policy",
+        "options": [
+          {
+            "text": "Require trusted chain and hostname match",
+            "explanation": "Both checks are required to authenticate the requested service."
+          },
+          {
+            "text": "Require trusted chain only",
+            "explanation": "C-17 already chains to a trusted CA but identifies a different DNS name."
+          },
+          {
+            "text": "Accept any certificate for this hostname",
+            "explanation": "C-21 has the right name but an untrusted issuer."
+          }
+        ],
+        "correct": [
+          0
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lab-change-window",
+    "domain": 1,
+    "objective": "1.3",
+    "topic": "Change impact and rollback",
+    "prompt": "Complete the release ticket. Choose the latest authorized deployment slot that still leaves time to observe the service and roll back before the window closes.",
+    "workspace": {
+      "title": "Change record",
+      "sources": [
+        {
+          "title": "Approved plan",
+          "columns": [
+            "Constraint",
+            "Value"
+          ],
+          "rows": [
+            [
+              "Maintenance window",
+              "01:00–02:00 UTC, rollback must finish by 02:00"
+            ],
+            [
+              "API dependency",
+              "Identity service upgrade completes at 01:15"
+            ],
+            [
+              "Deployment duration",
+              "10 minutes"
+            ],
+            [
+              "Observation period",
+              "15 minutes after deployment"
+            ],
+            [
+              "Rollback duration",
+              "10 minutes"
+            ],
+            [
+              "Backout trigger",
+              "Authentication errors exceed 2% for five minutes"
+            ]
+          ]
+        },
+        {
+          "title": "Validation run",
+          "columns": [
+            "Interval (UTC)",
+            "Observed authentication error rate"
+          ],
+          "rows": [
+            [
+              "01:39–01:44",
+              "0.5%"
+            ],
+            [
+              "01:44–01:49",
+              "3.1%"
+            ]
+          ]
+        }
+      ]
+    },
+    "tasks": [
+      {
+        "label": "Latest deployment start (HH:MM UTC)",
+        "kind": "text",
+        "accept": [
+          "01:25",
+          "1:25",
+          "0125"
+        ],
+        "rationale": "The 35-minute sequence must end by 02:00, so the latest start is 01:25. The dependency is already available."
+      },
+      {
+        "label": "Latest rollback start (HH:MM UTC)",
+        "kind": "text",
+        "accept": [
+          "01:50",
+          "1:50",
+          "0150"
+        ],
+        "rationale": "Allow the full ten minutes to restore the previous release."
+      },
+      {
+        "label": "Decision at 01:49",
+        "options": [
+          {
+            "text": "Start the approved backout",
+            "explanation": "The second five-minute interval breaches the 2% trigger while rollback is feasible."
+          },
+          {
+            "text": "Continue observing through 02:00",
+            "explanation": "Waiting consumes the approved rollback time."
+          },
+          {
+            "text": "Close the change as successful",
+            "explanation": "A sustained trigger breach precludes a successful close."
+          }
+        ],
+        "correct": [
+          0
+        ]
+      },
+      {
+        "label": "Evidence to attach to closeout",
+        "options": [
+          {
+            "text": "Authentication checks after restoration",
+            "explanation": "A service-level check verifies recovery of the affected dependency."
+          },
+          {
+            "text": "Original deployment approval",
+            "explanation": "Approval establishes authorization, not recovered service."
+          },
+          {
+            "text": "Scheduled start notice",
+            "explanation": "The notice records intent rather than the outcome."
+          }
+        ],
+        "correct": [
+          0
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lab-trust-policy",
+    "domain": 1,
+    "objective": "1.2",
+    "topic": "Zero Trust policy decisions",
+    "prompt": "Use the invoice application policy to complete the access review. Evaluate each request separately and identify where a denied session is stopped.",
+    "workspace": {
+      "title": "Access decision log",
+      "sources": [
+        {
+          "title": "Policy in force",
+          "columns": [
+            "ID",
+            "Condition",
+            "Result"
+          ],
+          "rows": [
+            [
+              "P1",
+              "Unmanaged device OR high session risk",
+              "Deny"
+            ],
+            [
+              "P2",
+              "Managed device, low risk, Finance group",
+              "Allow invoices"
+            ],
+            [
+              "P3",
+              "Anything else",
+              "Deny"
+            ]
+          ]
+        },
+        {
+          "title": "Requests",
+          "columns": [
+            "ID",
+            "Device",
+            "Risk",
+            "Group"
+          ],
+          "rows": [
+            [
+              "R14",
+              "Managed",
+              "Low",
+              "Finance"
+            ],
+            [
+              "R15",
+              "Unmanaged",
+              "Low",
+              "Finance"
+            ],
+            [
+              "R16",
+              "Managed",
+              "High",
+              "Finance"
+            ],
+            [
+              "R17",
+              "Managed",
+              "Low",
+              "Marketing"
+            ]
+          ]
+        }
+      ]
+    },
+    "tasks": [
+      {
+        "label": "Request ID eligible for access",
+        "kind": "text",
+        "accept": [
+          "R14"
+        ],
+        "rationale": "Only R14 meets every P2 condition without hitting a deny."
+      },
+      {
+        "label": "Rule ID that rejects R17",
+        "kind": "text",
+        "accept": [
+          "P3"
+        ],
+        "rationale": "Marketing fails the Finance condition. With a managed low-risk device, R17 reaches the catch-all."
+      },
+      {
+        "label": "Component that calculates the decision",
+        "options": [
+          {
+            "text": "Policy engine",
+            "explanation": "The engine evaluates policy and context."
+          },
+          {
+            "text": "Policy enforcement point",
+            "explanation": "It enforces an existing access decision."
+          },
+          {
+            "text": "Policy administrator",
+            "explanation": "It directs establishment or teardown based on the decision."
+          }
+        ],
+        "correct": [
+          0
+        ]
+      },
+      {
+        "label": "Component at the application boundary that blocks the session",
+        "options": [
+          {
+            "text": "Policy enforcement point",
+            "explanation": "It permits, monitors or terminates subject-to-resource connections."
+          },
+          {
+            "text": "Policy engine",
+            "explanation": "It decides whether access should be granted."
+          },
+          {
+            "text": "Identity provider",
+            "explanation": "It supplies identity evidence to the decision process."
+          }
+        ],
+        "correct": [
+          0
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lab-auth-triage",
+    "domain": 2,
+    "objective": "2.4",
+    "topic": "Authentication indicators",
+    "prompt": "Complete the sign-in alert using the summarized requests and the authentication log. The failure count is the number of attempts in the indicated window.",
+    "workspace": {
+      "title": "Sign-in investigation",
+      "sources": [
+        {
+          "title": "Failures by source, 08:00–08:05 UTC",
+          "columns": [
+            "Source IP",
+            "Distinct accounts",
+            "Failures per account"
+          ],
+          "rows": [
+            [
+              "192.0.2.41",
+              "48",
+              "1"
+            ],
+            [
+              "192.0.2.90",
+              "1",
+              "3"
+            ]
+          ]
+        },
+        {
+          "title": "Sign-in events",
+          "columns": [
+            "UTC",
+            "Source",
+            "Account",
+            "Outcome"
+          ],
+          "rows": [
+            [
+              "08:04:55",
+              "192.0.2.41",
+              "rcole",
+              "Bad password"
+            ],
+            [
+              "08:05:09",
+              "192.0.2.41",
+              "rcole",
+              "Password accepted, MFA denied"
+            ],
+            [
+              "08:05:11",
+              "192.0.2.41",
+              "rcole",
+              "Session token not issued"
+            ],
+            [
+              "08:05:15",
+              "192.0.2.90",
+              "svc-print",
+              "Bad password"
+            ]
+          ]
+        }
+      ]
+    },
+    "tasks": [
+      {
+        "label": "Source to investigate first",
+        "kind": "text",
+        "accept": [
+          "192.0.2.41"
+        ],
+        "rationale": "This source tried 48 accounts in the same short interval."
+      },
+      {
+        "label": "Account with an accepted password",
+        "kind": "text",
+        "accept": [
+          "rcole"
+        ],
+        "rationale": "The authentication log names rcole at 08:05:09."
+      },
+      {
+        "label": "Pattern most consistent with the failures",
+        "options": [
+          {
+            "text": "Password spraying",
+            "explanation": "One attempt per account across many accounts is consistent with spraying. The log does not reveal the actual candidate password."
+          },
+          {
+            "text": "Single-account brute force",
+            "explanation": "This usually concentrates attempts on one account."
+          },
+          {
+            "text": "MFA fatigue",
+            "explanation": "The exhibit shows one MFA denial rather than a burst of approval requests."
+          }
+        ],
+        "correct": [
+          0
+        ]
+      },
+      {
+        "label": "Session assessment for rcole",
+        "options": [
+          {
+            "text": "No session issued in the observed attempt",
+            "explanation": "The final token decision explicitly records this outcome."
+          },
+          {
+            "text": "Confirmed successful remote session",
+            "explanation": "Password acceptance preceded an MFA denial and no token was issued."
+          },
+          {
+            "text": "Confirmed data access by the source",
+            "explanation": "These are authentication records. Data access needs separate evidence."
+          }
+        ],
+        "correct": [
+          0
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lab-dns-investigation",
+    "domain": 2,
+    "objective": "2.4",
+    "topic": "DNS and process indicators",
+    "prompt": "Triage the endpoint that best fits the alert. Record the asset and process identifiers and decide how much the evidence supports.",
+    "workspace": {
+      "title": "DNS alert worksheet",
+      "sources": [
+        {
+          "title": "Ten-minute DNS summary",
+          "columns": [
+            "Host",
+            "Parent domain",
+            "Unique labels",
+            "Label length",
+            "Scheduled job"
+          ],
+          "rows": [
+            [
+              "W-04",
+              "update.cedar.example",
+              "2",
+              "8–10",
+              "Software inventory"
+            ],
+            [
+              "W-19",
+              "sample.example",
+              "426",
+              "52–57",
+              "None recorded"
+            ],
+            [
+              "W-22",
+              "print.cedar.example",
+              "3",
+              "5–9",
+              "Printer discovery"
+            ]
+          ]
+        },
+        {
+          "title": "Endpoint DNS events",
+          "columns": [
+            "Host",
+            "UTC",
+            "Process ID",
+            "Image",
+            "Parent"
+          ],
+          "rows": [
+            [
+              "W-19",
+              "10:03",
+              "7612",
+              "invoice-viewer.exe",
+              "mailclient.exe"
+            ],
+            [
+              "W-19",
+              "10:05",
+              "1280",
+              "browser.exe",
+              "shell.exe"
+            ],
+            [
+              "W-04",
+              "10:05",
+              "2880",
+              "inventory.exe",
+              "scheduler.exe"
+            ]
+          ]
+        },
+        {
+          "title": "Resolver correlation",
+          "columns": [
+            "UTC",
+            "Host",
+            "Process ID",
+            "Query set"
+          ],
+          "rows": [
+            [
+              "10:03",
+              "W-19",
+              "7612",
+              "Long labels under sample.example"
+            ],
+            [
+              "10:05",
+              "W-19",
+              "1280",
+              "portal.cedar.example"
+            ]
+          ]
+        }
+      ]
+    },
+    "tasks": [
+      {
+        "label": "Asset ID",
+        "kind": "text",
+        "accept": [
+          "W-19"
+        ],
+        "rationale": "W-19 is the outlier in both label count and length."
+      },
+      {
+        "label": "Process ID to preserve",
+        "kind": "number",
+        "accept": [
+          "7612"
+        ],
+        "rationale": "The resolver correlation ties the long labels to this process."
+      },
+      {
+        "label": "Working classification",
+        "options": [
+          {
+            "text": "Suspected DNS tunneling",
+            "explanation": "The unusual query pattern and process attribution warrant this hypothesis."
+          },
+          {
+            "text": "Confirmed DNS cache poisoning",
+            "explanation": "The evidence concerns queries, not corrupted cached answers."
+          },
+          {
+            "text": "Confirmed DNS amplification",
+            "explanation": "There is no measured surge of large reflected replies."
+          }
+        ],
+        "correct": [
+          0
+        ]
+      },
+      {
+        "label": "Evidence needed to establish disclosure",
+        "options": [
+          {
+            "text": "Show the queries carried protected content",
+            "explanation": "Volume and label length do not identify the underlying data."
+          },
+          {
+            "text": "Show that the host used a resolver",
+            "explanation": "That fact is already established and is normal."
+          },
+          {
+            "text": "Show that the application had a process ID",
+            "explanation": "A process ID attributes the request but does not identify its content."
+          }
+        ],
+        "correct": [
+          0
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lab-network-flood",
+    "domain": 2,
+    "objective": "2.4",
+    "topic": "Network availability indicators",
+    "prompt": "Complete the outage record using the edge and service measurements. Keep conclusions within the observed traffic.",
+    "workspace": {
+      "title": "Availability incident record",
+      "sources": [
+        {
+          "title": "Edge capture summary",
+          "columns": [
+            "Destination",
+            "Inbound",
+            "Traffic",
+            "Matching preceding outbound queries"
+          ],
+          "rows": [
+            [
+              "198.51.100.17",
+              "1.8 Gbps",
+              "Large UDP DNS replies from many resolvers",
+              "None"
+            ],
+            [
+              "198.51.100.23",
+              "8 Mbps",
+              "Established HTTPS sessions",
+              "Expected"
+            ]
+          ]
+        },
+        {
+          "title": "Service telemetry",
+          "columns": [
+            "Asset",
+            "Link capacity",
+            "CPU",
+            "Link drops"
+          ],
+          "rows": [
+            [
+              "198.51.100.17",
+              "1 Gbps",
+              "21%",
+              "Rising"
+            ],
+            [
+              "198.51.100.23",
+              "1 Gbps",
+              "34%",
+              "Stable"
+            ]
+          ]
+        }
+      ]
+    },
+    "tasks": [
+      {
+        "label": "Affected destination IP",
+        "kind": "text",
+        "accept": [
+          "198.51.100.17"
+        ],
+        "rationale": "The excess traffic and rising drops occur at this destination."
+      },
+      {
+        "label": "Best-supported traffic pattern",
+        "options": [
+          {
+            "text": "Reflected DNS traffic",
+            "explanation": "The unsolicited replies arrive from many resolvers without preceding requests from this site."
+          },
+          {
+            "text": "On-path interception",
+            "explanation": "The capture shows volume and direction, not interception of a conversation."
+          },
+          {
+            "text": "Credential replay",
+            "explanation": "The exhibit contains no authentication exchange."
+          }
+        ],
+        "correct": [
+          0
+        ]
+      },
+      {
+        "label": "Constrained resource",
+        "options": [
+          {
+            "text": "Ingress link capacity",
+            "explanation": "1.8 Gbps exceeds the 1 Gbps link while the destination CPU remains low."
+          },
+          {
+            "text": "Application CPU",
+            "explanation": "21% CPU does not account for drops at the saturated ingress."
+          },
+          {
+            "text": "Certificate validity",
+            "explanation": "The traffic is unsolicited UDP DNS, with no TLS error evidence."
+          }
+        ],
+        "correct": [
+          0
+        ]
+      },
+      {
+        "label": "Mitigation point for the saturated circuit",
+        "options": [
+          {
+            "text": "Upstream provider filtering",
+            "explanation": "Removing unwanted traffic before it crosses the constrained link protects capacity."
+          },
+          {
+            "text": "Host firewall on the destination",
+            "explanation": "It sees packets after they have occupied the ingress link."
+          },
+          {
+            "text": "Extra application worker processes",
+            "explanation": "More workers do not increase upstream circuit capacity."
+          }
+        ],
+        "correct": [
+          0
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lab-firewall",
+    "domain": 3,
+    "objective": "3.2",
+    "topic": "Stateful network segmentation",
+    "prompt": "Add one least-privilege rule for the approved telemetry flow. The firewall tracks return traffic and denies all other new connections. Use the packet preview to inspect your configuration.",
+    "workspace": {
+      "title": "Firewall rule editor",
+      "sources": [
+        {
+          "title": "Approved change",
+          "columns": [
+            "Field",
+            "Requirement"
+          ],
+          "rows": [
+            [
+              "Sender",
+              "Collector at 10.34.1.8 only"
+            ],
+            [
+              "Receiver",
+              "Archive at 10.34.2.19 only"
+            ],
+            [
+              "Service",
+              "TLS over TCP on destination port 6514"
+            ],
+            [
+              "Existing policy",
+              "Default deny. No other permit rules."
+            ]
+          ]
+        }
+      ],
+      "probes": [
+        {
+          "name": "Collector → archive / TCP 6514",
+          "source": "10.34.1.8",
+          "destination": "10.34.2.19",
+          "protocol": "tcp",
+          "port": 6514
+        },
+        {
+          "name": "Neighbor → archive / TCP 6514",
+          "source": "10.34.1.9",
+          "destination": "10.34.2.19",
+          "protocol": "tcp",
+          "port": 6514
+        },
+        {
+          "name": "Collector → archive / TCP 443",
+          "source": "10.34.1.8",
+          "destination": "10.34.2.19",
+          "protocol": "tcp",
+          "port": 443
+        },
+        {
+          "name": "Collector → archive / UDP 6514",
+          "source": "10.34.1.8",
+          "destination": "10.34.2.19",
+          "protocol": "udp",
+          "port": 6514
+        }
+      ]
+    },
+    "tasks": [
+      {
+        "label": "Source host",
+        "kind": "text",
+        "accept": [
+          "10.34.1.8",
+          "10.34.1.8/32"
+        ],
+        "rationale": "Only the collector may originate this connection.",
+        "key": "source"
+      },
+      {
+        "label": "Destination host",
+        "kind": "text",
+        "accept": [
+          "10.34.2.19",
+          "10.34.2.19/32"
+        ],
+        "rationale": "Only the archive may receive this flow.",
+        "key": "destination"
+      },
+      {
+        "label": "Transport",
+        "options": [
+          {
+            "text": "TCP",
+            "explanation": "The approved service explicitly uses TCP."
+          },
+          {
+            "text": "UDP",
+            "explanation": "UDP does not carry this specified TCP service."
+          },
+          {
+            "text": "Any",
+            "explanation": "The change authorizes one transport."
+          }
+        ],
+        "correct": [
+          0
+        ],
+        "key": "protocol"
+      },
+      {
+        "label": "Destination port",
+        "kind": "number",
+        "accept": [
+          "6514"
+        ],
+        "rationale": "The service record specifies TCP destination port 6514.",
+        "key": "port"
+      },
+      {
+        "label": "Rule action",
+        "options": [
+          {
+            "text": "Allow",
+            "explanation": "A narrow permit opens the approved exception."
+          },
+          {
+            "text": "Deny",
+            "explanation": "The default already denies this flow."
+          }
+        ],
+        "correct": [
+          0
+        ],
+        "key": "action"
+      }
+    ]
+  },
+  {
+    "id": "lab-switch-ports",
+    "domain": 3,
+    "objective": "3.2",
+    "topic": "Access VLAN assignment",
+    "prompt": "Assign each access port to the approved VLAN using the asset inventory. All three ports connect to end devices. Finish the design by choosing the enforcement point for permitted cross-zone flows.",
+    "workspace": {
+      "title": "Access switch panel",
+      "sources": [
+        {
+          "title": "Zone plan",
+          "columns": [
+            "VLAN ID",
+            "Zone",
+            "Allowed use"
+          ],
+          "rows": [
+            [
+              "18",
+              "Clinical users",
+              "Managed operator workstations"
+            ],
+            [
+              "45",
+              "Medical devices",
+              "Dedicated diagnostic instruments"
+            ],
+            [
+              "72",
+              "Visitors",
+              "Internet-only visitor network"
+            ],
+            [
+              "99",
+              "Management",
+              "Infrastructure administrators only"
+            ]
+          ]
+        },
+        {
+          "title": "Cabling inventory",
+          "columns": [
+            "Port",
+            "Attached asset"
+          ],
+          "rows": [
+            [
+              "Gi1/3",
+              "Managed operator workstation"
+            ],
+            [
+              "Gi1/4",
+              "Diagnostic instrument"
+            ],
+            [
+              "Gi1/5",
+              "Visitor kiosk"
+            ]
+          ]
+        }
+      ]
+    },
+    "tasks": [
+      {
+        "label": "Access VLAN on Gi1/3",
+        "kind": "number",
+        "accept": [
+          "18"
+        ],
+        "rationale": "The managed workstation belongs in the clinical user zone."
+      },
+      {
+        "label": "Access VLAN on Gi1/4",
+        "kind": "number",
+        "accept": [
+          "45"
+        ],
+        "rationale": "The diagnostic instrument belongs in the medical-device zone."
+      },
+      {
+        "label": "Access VLAN on Gi1/5",
+        "kind": "number",
+        "accept": [
+          "72"
+        ],
+        "rationale": "The visitor kiosk needs the Internet-only zone."
+      },
+      {
+        "label": "Control for traffic between zones",
+        "options": [
+          {
+            "text": "Inter-VLAN firewall or routed ACL",
+            "explanation": "A routed enforcement point can permit specific flows and deny others."
+          },
+          {
+            "text": "Access-port VLAN label alone",
+            "explanation": "A label assigns the segment but does not define permitted routed flows."
+          },
+          {
+            "text": "Switch port description",
+            "explanation": "A description documents intent and does not enforce it."
+          }
+        ],
+        "correct": [
+          0
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lab-recovery",
+    "domain": 3,
+    "objective": "3.4",
+    "topic": "Backup selection and restoration",
+    "prompt": "Choose the newest clean restore point that meets both business targets. Calculate the loss of committed data and the elapsed recovery time, then decide whether to release the service.",
+    "workspace": {
+      "title": "Recovery console",
+      "sources": [
+        {
+          "title": "Continuity requirements",
+          "columns": [
+            "Requirement",
+            "Value"
+          ],
+          "rows": [
+            [
+              "Service unavailable",
+              "14:00 UTC"
+            ],
+            [
+              "First corrupted write",
+              "13:50 UTC"
+            ],
+            [
+              "Maximum data loss",
+              "20 minutes before the outage"
+            ],
+            [
+              "Maximum downtime",
+              "45 minutes"
+            ],
+            [
+              "Release condition",
+              "Owner verifies a successful read and write in the restored service"
+            ]
+          ]
+        },
+        {
+          "title": "Restore drill",
+          "columns": [
+            "Set",
+            "Last included commit",
+            "Completed restore and service checks"
+          ],
+          "rows": [
+            [
+              "B-08",
+              "13:35",
+              "14:22"
+            ],
+            [
+              "B-09",
+              "13:44",
+              "14:31"
+            ],
+            [
+              "B-10",
+              "13:52",
+              "14:18"
+            ]
+          ]
+        }
+      ]
+    },
+    "tasks": [
+      {
+        "label": "Restore set ID",
+        "kind": "text",
+        "accept": [
+          "B-09"
+        ],
+        "rationale": "B-09 predates corruption and is within both time budgets. B-10 includes a corrupt write."
+      },
+      {
+        "label": "Data loss in minutes for the selected set",
+        "kind": "number",
+        "accept": [
+          "16"
+        ],
+        "rationale": "14:00 minus 13:44 is 16 minutes."
+      },
+      {
+        "label": "Downtime in minutes for the selected set",
+        "kind": "number",
+        "accept": [
+          "31"
+        ],
+        "rationale": "The restored service passed checks at 14:31."
+      },
+      {
+        "label": "Release evidence to retain",
+        "options": [
+          {
+            "text": "Owner-confirmed read and write results",
+            "explanation": "Those transactions meet the stated release condition."
+          },
+          {
+            "text": "Storage volume mounted successfully",
+            "explanation": "A mounted volume does not validate the application transactions."
+          },
+          {
+            "text": "Backup job started successfully",
+            "explanation": "Job initiation provides no evidence of a usable restoration."
+          }
+        ],
+        "correct": [
+          0
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lab-lease-trace",
+    "domain": 4,
+    "objective": "4.9",
+    "topic": "DHCP and endpoint correlation",
+    "prompt": "Complete the incident record for the 09:18 alert. The workstation address was reused on the same day. Use UTC throughout.",
+    "workspace": {
+      "title": "SOC evidence worksheet",
+      "sources": [
+        {
+          "title": "Egress log",
+          "columns": [
+            "UTC",
+            "Source",
+            "Destination",
+            "Disposition"
+          ],
+          "rows": [
+            [
+              "09:18",
+              "10.8.4.36",
+              "198.51.100.49:443",
+              "Allowed"
+            ],
+            [
+              "12:12",
+              "10.8.4.36",
+              "192.0.2.25:443",
+              "Allowed"
+            ]
+          ]
+        },
+        {
+          "title": "Lease history",
+          "columns": [
+            "Address",
+            "Client",
+            "UTC lease interval"
+          ],
+          "rows": [
+            [
+              "10.8.4.36",
+              "WS-08",
+              "08:00–10:00"
+            ],
+            [
+              "10.8.4.36",
+              "WS-31",
+              "11:00–15:00"
+            ]
+          ]
+        },
+        {
+          "title": "Endpoint network telemetry",
+          "columns": [
+            "UTC",
+            "Client",
+            "Process ID",
+            "Destination"
+          ],
+          "rows": [
+            [
+              "09:18",
+              "WS-08",
+              "4480",
+              "198.51.100.49:443"
+            ],
+            [
+              "09:18",
+              "WS-08",
+              "5120",
+              "10.8.1.4:53"
+            ],
+            [
+              "12:12",
+              "WS-31",
+              "872",
+              "192.0.2.25:443"
+            ]
+          ]
+        }
+      ]
+    },
+    "tasks": [
+      {
+        "label": "Client to investigate",
+        "kind": "text",
+        "accept": [
+          "WS-08"
+        ],
+        "rationale": "The 09:18 alert falls inside the WS-08 lease."
+      },
+      {
+        "label": "Process ID for the alerted connection",
+        "kind": "number",
+        "accept": [
+          "4480"
+        ],
+        "rationale": "The endpoint, timestamp and destination match process 4480."
+      },
+      {
+        "label": "Remote IP in the alert",
+        "kind": "text",
+        "accept": [
+          "198.51.100.49"
+        ],
+        "rationale": "The earlier egress record identifies this peer."
+      },
+      {
+        "label": "Supported incident statement",
+        "options": [
+          {
+            "text": "Endpoint telemetry ties the connection to a process",
+            "explanation": "The independent endpoint record identifies the process and peer."
+          },
+          {
+            "text": "Confidential records were disclosed",
+            "explanation": "A permitted connection does not identify the contents transferred."
+          },
+          {
+            "text": "The current address holder initiated the earlier connection",
+            "explanation": "WS-31 obtained the lease later."
+          }
+        ],
+        "correct": [
+          0
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lab-iam-change",
+    "domain": 4,
+    "objective": "4.6",
+    "topic": "Entitlement review and separation of duties",
+    "prompt": "Update the access review for a department transfer. Apply the approved role matrix and remove any conflicting standing grant.",
+    "workspace": {
+      "title": "Identity entitlement editor",
+      "sources": [
+        {
+          "title": "Transfer notice",
+          "columns": [
+            "Record",
+            "Value"
+          ],
+          "rows": [
+            [
+              "Employee",
+              "Nora Reed, identity U-172"
+            ],
+            [
+              "Effective role",
+              "Purchasing analyst"
+            ],
+            [
+              "Rule",
+              "Order submission and payment approval cannot belong to the same person."
+            ],
+            [
+              "Exception approvals",
+              "None"
+            ]
+          ]
+        },
+        {
+          "title": "Group catalog",
+          "columns": [
+            "ID",
+            "Entitlement",
+            "Current assignment"
+          ],
+          "rows": [
+            [
+              "G-51",
+              "Submit purchase orders",
+              "Missing"
+            ],
+            [
+              "G-52",
+              "Read supplier catalog",
+              "Assigned and required"
+            ],
+            [
+              "G-61",
+              "Approve payments",
+              "Standing grant from previous role"
+            ],
+            [
+              "G-77",
+              "Manage identity directory",
+              "Unassigned"
+            ]
+          ]
+        }
+      ]
+    },
+    "tasks": [
+      {
+        "label": "Directory identity to update",
+        "kind": "text",
+        "accept": [
+          "U-172"
+        ],
+        "rationale": "Use the identity from the authorized transfer notice."
+      },
+      {
+        "label": "Group to add",
+        "kind": "text",
+        "accept": [
+          "G-51"
+        ],
+        "rationale": "The analyst must submit orders and lacks that entitlement."
+      },
+      {
+        "label": "Group to revoke",
+        "kind": "text",
+        "accept": [
+          "G-61"
+        ],
+        "rationale": "Payment approval conflicts with order submission."
+      },
+      {
+        "label": "Group G-52",
+        "options": [
+          {
+            "text": "Retain",
+            "explanation": "The new job still requires read access to the supplier catalog."
+          },
+          {
+            "text": "Revoke",
+            "explanation": "Removing the required read entitlement would prevent normal work."
+          },
+          {
+            "text": "Elevate to catalog administrator",
+            "explanation": "The new job needs read access only."
+          }
+        ],
+        "correct": [
+          0
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lab-wifi-profile",
+    "domain": 4,
+    "objective": "4.1",
+    "topic": "Enterprise wireless hardening",
+    "prompt": "Complete the managed wireless profile using the approved design. Corporate devices have individual client certificates. A contractor SSID is managed separately.",
+    "workspace": {
+      "title": "Wireless profile editor",
+      "sources": [
+        {
+          "title": "Deployment record",
+          "columns": [
+            "Setting",
+            "Approved value or constraint"
+          ],
+          "rows": [
+            [
+              "Corporate network",
+              "Cedar-Staff"
+            ],
+            [
+              "Wireless security",
+              "WPA3 with per-device enterprise authentication"
+            ],
+            [
+              "RADIUS server",
+              "radius.cedar.example, certificate from Cedar Network CA"
+            ],
+            [
+              "Authentication",
+              "Mutually authenticated using installed client certificates"
+            ],
+            [
+              "Other nearby SSID",
+              "Cedar-Guest uses a visitor passphrase"
+            ]
+          ]
+        }
+      ]
+    },
+    "tasks": [
+      {
+        "label": "SSID (use the spelling shown)",
+        "kind": "exact",
+        "accept": [
+          "Cedar-Staff"
+        ],
+        "rationale": "The profile targets the corporate SSID."
+      },
+      {
+        "label": "Security mode",
+        "options": [
+          {
+            "text": "WPA3-Enterprise",
+            "explanation": "This mode supports the enterprise authentication design."
+          },
+          {
+            "text": "WPA3-Personal",
+            "explanation": "SAE authenticates using a shared password in this mode."
+          },
+          {
+            "text": "Enhanced Open",
+            "explanation": "OWE encrypts open wireless traffic without this enterprise identity check."
+          }
+        ],
+        "correct": [
+          0
+        ]
+      },
+      {
+        "label": "EAP method",
+        "options": [
+          {
+            "text": "EAP-TLS",
+            "explanation": "Client and server certificates support mutual authentication."
+          },
+          {
+            "text": "PEAP with password authentication",
+            "explanation": "The specified client credential is a certificate."
+          },
+          {
+            "text": "EAP-MD5",
+            "explanation": "It does not implement the required mutual certificate authentication."
+          }
+        ],
+        "correct": [
+          0
+        ]
+      },
+      {
+        "label": "Expected authentication server DNS name",
+        "kind": "text",
+        "accept": [
+          "radius.cedar.example",
+          "radius.cedar.example."
+        ],
+        "rationale": "Pin the expected server identity with the approved CA so clients validate the intended authentication server."
+      }
+    ]
+  },
+  {
+    "id": "lab-risk-ledger",
+    "domain": 5,
+    "objective": "5.2",
+    "topic": "Quantitative risk worksheet",
+    "prompt": "Fill in the annual risk worksheet. Use dollars and the estimates supplied by the risk owner. Enter the net annual benefit after the annual control cost.",
+    "workspace": {
+      "title": "Risk register calculator",
+      "sources": [
+        {
+          "title": "Loss model",
+          "columns": [
+            "Input",
+            "Estimate"
+          ],
+          "rows": [
+            [
+              "Asset value",
+              "$160,000"
+            ],
+            [
+              "Loss per incident",
+              "25% of asset value"
+            ],
+            [
+              "Frequency before control",
+              "One incident every two years"
+            ],
+            [
+              "Frequency after control",
+              "One incident every eight years"
+            ],
+            [
+              "Annual control cost",
+              "$7,000"
+            ],
+            [
+              "Severity per incident",
+              "Unchanged"
+            ]
+          ]
+        }
+      ]
+    },
+    "tasks": [
+      {
+        "label": "Single loss expectancy ($)",
+        "kind": "number",
+        "accept": [
+          "40000"
+        ],
+        "rationale": "160,000 × 0.25 = 40,000 per incident.",
+        "unit": "usd"
+      },
+      {
+        "label": "Annual loss expectancy before control ($)",
+        "kind": "number",
+        "accept": [
+          "20000"
+        ],
+        "rationale": "40,000 × 0.5 = 20,000 per year.",
+        "unit": "usd"
+      },
+      {
+        "label": "Annual loss expectancy after control ($)",
+        "kind": "number",
+        "accept": [
+          "5000"
+        ],
+        "rationale": "40,000 × 0.125 = 5,000 per year.",
+        "unit": "usd"
+      },
+      {
+        "label": "Net annual benefit ($)",
+        "kind": "number",
+        "accept": [
+          "8000"
+        ],
+        "rationale": "20,000 − 5,000 − 7,000 = 8,000 per year under the given assumptions.",
+        "unit": "usd"
+      }
+    ]
+  },
+  {
+    "id": "lab-vendor-evidence",
+    "domain": 5,
+    "objective": "5.3",
+    "topic": "Supplier assurance and evidence scope",
+    "prompt": "Prepare the supplier onboarding decision. Match the service under contract to the assurance evidence and record the open contractual requirement.",
+    "workspace": {
+      "title": "Supplier assessment record",
+      "sources": [
+        {
+          "title": "Contract excerpt",
+          "columns": [
+            "Requirement",
+            "Scope"
+          ],
+          "rows": [
+            [
+              "Service under review",
+              "Cedar Vault EU production"
+            ],
+            [
+              "Evidence window",
+              "Operating controls for January–June 2026"
+            ],
+            [
+              "Incident notification",
+              "Within 24 hours of confirmed impact"
+            ]
+          ]
+        },
+        {
+          "title": "Evidence received",
+          "columns": [
+            "ID",
+            "Document",
+            "Scope or finding"
+          ],
+          "rows": [
+            [
+              "E-10",
+              "Independent operating-effectiveness report",
+              "US payroll, January–June 2026"
+            ],
+            [
+              "E-14",
+              "Independent operating-effectiveness report",
+              "Cedar Vault EU production, January–June 2026"
+            ],
+            [
+              "E-18",
+              "Control design description",
+              "Cedar Vault EU production, on 30 June"
+            ],
+            [
+              "E-22",
+              "Supplier notification procedure",
+              "Confirmed customer-impact incidents reported within 72 hours"
+            ]
+          ]
+        }
+      ]
+    },
+    "tasks": [
+      {
+        "label": "Evidence covering the required operating period and service",
+        "kind": "text",
+        "accept": [
+          "E-14"
+        ],
+        "rationale": "E-14 matches the required geography, production service and six-month period."
+      },
+      {
+        "label": "Evidence ID showing the contract gap",
+        "kind": "text",
+        "accept": [
+          "E-22"
+        ],
+        "rationale": "The procedure specifies 72 hours while the contract requires 24."
+      },
+      {
+        "label": "Notification deadline to record (hours)",
+        "kind": "number",
+        "accept": [
+          "24"
+        ],
+        "rationale": "The customer contract sets the required deadline."
+      },
+      {
+        "label": "Disposition of the notification issue",
+        "options": [
+          {
+            "text": "Record the gap and obtain remediation or authorized risk disposition",
+            "explanation": "The operating report does not resolve the separate notification mismatch."
+          },
+          {
+            "text": "Close based on the scoped operating report",
+            "explanation": "The notification procedure still conflicts with the contract."
+          },
+          {
+            "text": "Accept the procedure as a contract amendment",
+            "explanation": "An internal supplier procedure alone cannot amend the agreement."
+          }
+        ],
+        "correct": [
+          0
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lab-awareness",
+    "domain": 5,
+    "objective": "5.6",
+    "topic": "Phishing reporting and measurement",
+    "prompt": "Complete the follow-up worksheet for an authorized awareness exercise. Each reported message is counted once per recipient. Use whole percentages.",
+    "workspace": {
+      "title": "Awareness campaign report",
+      "sources": [
+        {
+          "title": "Exercise measures",
+          "columns": [
+            "Measure",
+            "Round 1",
+            "Round 2"
+          ],
+          "rows": [
+            [
+              "Successfully delivered",
+              "100",
+              "80"
+            ],
+            [
+              "Unique recipients who reported",
+              "30",
+              "32"
+            ],
+            [
+              "Recipients who entered simulated credentials",
+              "8",
+              "4"
+            ],
+            [
+              "Median minutes to first report",
+              "18",
+              "7"
+            ]
+          ]
+        },
+        {
+          "title": "Employee report",
+          "columns": [
+            "Ticket",
+            "Observation"
+          ],
+          "rows": [
+            [
+              "AR-11",
+              "Employee reported an unexpected invoice through the approved channel."
+            ],
+            [
+              "AR-12",
+              "Employee entered a real work password on an unrelated suspicious page and then reported it."
+            ]
+          ]
+        }
+      ]
+    },
+    "tasks": [
+      {
+        "label": "Round 2 reporting rate (%)",
+        "kind": "number",
+        "accept": [
+          "40"
+        ],
+        "rationale": "32 of 80 recipients reported the simulation, or 40%.",
+        "unit": "percent"
+      },
+      {
+        "label": "Round 2 simulated credential-entry rate (%)",
+        "kind": "number",
+        "accept": [
+          "5"
+        ],
+        "rationale": "4 of 80 recipients entered simulated credentials, or 5%.",
+        "unit": "percent"
+      },
+      {
+        "label": "Ticket needing real credential-exposure response",
+        "kind": "text",
+        "accept": [
+          "AR-12"
+        ],
+        "rationale": "AR-12 reports real credential entry on a different page. Route it for incident handling."
+      },
+      {
+        "label": "Interpretation of the exercise",
+        "options": [
+          {
+            "text": "Reporting was faster and a larger fraction reported",
+            "explanation": "The median fell from 18 to 7 minutes and the reporting rate rose from 30% to 40%."
+          },
+          {
+            "text": "All unreported messages were opened",
+            "explanation": "Delivery and reporting counts do not record opens."
+          },
+          {
+            "text": "The exercise establishes lower real-world incident frequency",
+            "explanation": "These are exercise measures, not a count of real-world incidents."
+          }
+        ],
+        "correct": [
+          0
+        ]
+      }
+    ]
+  },
+  {
+    "id": "case-change-freeze",
+    "domain": 1,
+    "objective": "1.3",
+    "topic": "Change exceptions",
+    "prompt": "A payroll freeze is in effect when a vendor issues an urgent fix. The emergency policy requires the duty manager to authorize exceptions. Which record permits the team to proceed during the freeze?",
+    "options": [
+      {
+        "text": "Duty manager approval tied to the emergency change",
+        "explanation": "The specified authority can authorize the exception for this change."
+      },
+      {
+        "text": "Vendor advisory identifying affected versions",
+        "explanation": "The advisory establishes applicability and urgency, not local authorization."
+      },
+      {
+        "text": "Successful staging test signed by the engineer",
+        "explanation": "The staging result establishes technical evidence for approval."
+      },
+      {
+        "text": "Rollback plan signed by the service owner",
+        "explanation": "Rollback planning reduces risk but does not grant the named exception."
+      }
+    ],
+    "correct": [
+      0
+    ]
+  },
+  {
+    "id": "case-zero-trust",
+    "domain": 1,
+    "objective": "1.2",
+    "topic": "Policy enforcement",
+    "prompt": "The identity provider authenticated a user an hour ago. The policy engine has just denied continued access because the device fell out of compliance. Where should the application connection be terminated?",
+    "options": [
+      {
+        "text": "At the policy enforcement point",
+        "explanation": "It controls the actual connection to the protected resource."
+      },
+      {
+        "text": "At the policy engine",
+        "explanation": "It computes access decisions and supplies them for enforcement."
+      },
+      {
+        "text": "At the certificate authority",
+        "explanation": "A CA issues or revokes credentials rather than closing this application connection."
+      },
+      {
+        "text": "At the directory synchronization service",
+        "explanation": "Directory synchronization replicates identity data."
+      }
+    ],
+    "correct": [
+      0
+    ]
+  },
+  {
+    "id": "case-sign-release",
+    "domain": 1,
+    "objective": "1.4",
+    "topic": "Release integrity",
+    "prompt": "An administrator downloads an installer and its checksum from a single mirror. The publisher also supplies a detached signature. Which TWO checks together give the strongest evidence of publisher origin? Select TWO.",
+    "options": [
+      {
+        "text": "Verify the signature over the downloaded artifact",
+        "explanation": "This binds verification to the bytes being installed."
+      },
+      {
+        "text": "Check that the mirror also serves the checksum over HTTPS",
+        "explanation": "This protects the connection to the mirror but does not independently authenticate the publisher."
+      },
+      {
+        "text": "Compare the advertised and downloaded file lengths",
+        "explanation": "Equal lengths do not authenticate the contents."
+      },
+      {
+        "text": "Authenticate the publisher’s public key through an independent trusted channel",
+        "explanation": "The signature is meaningful only if the verification key is trusted for the publisher."
+      },
+      {
+        "text": "Use the file creation time to identify the signing authority",
+        "explanation": "Filesystem timestamps do not establish signer identity."
+      }
+    ],
+    "correct": [
+      0,
+      3
+    ]
+  },
+  {
+    "id": "case-door-log",
+    "domain": 1,
+    "objective": "1.1",
+    "topic": "Control purpose",
+    "prompt": "A camera records every vestibule entry. A guard reviews yesterday’s footage to discover badge sharing. Which control function describes the review itself?",
+    "options": [
+      {
+        "text": "Detective",
+        "explanation": "The review identifies evidence of a past event."
+      },
+      {
+        "text": "Deterrent",
+        "explanation": "A conspicuous camera may deter entry, but the question concerns reviewing footage."
+      },
+      {
+        "text": "Preventive",
+        "explanation": "The retrospective review cannot stop yesterday’s entry."
+      },
+      {
+        "text": "Corrective",
+        "explanation": "Corrective action would address the damage or restore the desired state."
+      }
+    ],
+    "correct": [
+      0
+    ]
+  },
+  {
+    "id": "case-vault-secret",
+    "domain": 1,
+    "objective": "1.4",
+    "topic": "Private-key custody",
+    "prompt": "A release pipeline must sign builds, and its operator must be unable to export the signing private key. Which design best satisfies both requirements?",
+    "options": [
+      {
+        "text": "Issue the pipeline signing permission on a nonexportable HSM key",
+        "explanation": "The protected module performs signing without releasing the private material."
+      },
+      {
+        "text": "Encrypt an exportable key and let the pipeline decrypt it for each build",
+        "explanation": "The runner receives a usable copy of the key."
+      },
+      {
+        "text": "Store the signing certificate in a read-only artifact repository",
+        "explanation": "The certificate contains a public key and cannot produce signatures."
+      },
+      {
+        "text": "Replace signatures with checksums from the same runner",
+        "explanation": "A plain checksum does not authenticate the publisher."
+      }
+    ],
+    "correct": [
+      0
+    ]
+  },
+  {
+    "id": "case-network-correlation",
+    "domain": 2,
+    "objective": "2.4",
+    "topic": "Authentication anomalies",
+    "prompt": "Two sign-ins ten minutes apart appear to originate on different continents. Both IPs belong to the company’s VPN provider. Which evidence would best distinguish VPN egress changes from credential misuse?",
+    "options": [
+      {
+        "text": "Identity session IDs and device-bound sign-in records",
+        "explanation": "They help determine whether both events belong to the same authenticated device and session."
+      },
+      {
+        "text": "Another geolocation lookup on the same two egress IPs",
+        "explanation": "It may confirm the exits’ locations but not the user’s location."
+      },
+      {
+        "text": "The number of employees in each country",
+        "explanation": "Population counts do not attribute either session."
+      },
+      {
+        "text": "The employee’s assigned office country",
+        "explanation": "An office assignment does not show where a session originated."
+      }
+    ],
+    "correct": [
+      0
+    ]
+  },
+  {
+    "id": "case-mobile-source",
+    "domain": 2,
+    "objective": "2.3",
+    "topic": "Mobile application risk",
+    "prompt": "An enterprise phone installs an application package obtained from an email attachment. The operating system’s privilege restrictions otherwise remain intact. Which condition does the evidence establish?",
+    "options": [
+      {
+        "text": "Sideloading",
+        "explanation": "Installation bypassed the normal approved application distribution path."
+      },
+      {
+        "text": "Jailbreaking",
+        "explanation": "The record does not show removal of operating system restrictions."
+      },
+      {
+        "text": "Privilege escalation",
+        "explanation": "The install source alone does not establish elevated privileges."
+      },
+      {
+        "text": "Supply-chain compromise",
+        "explanation": "The record does not demonstrate compromise of a supplier."
+      }
+    ],
+    "correct": [
+      0
+    ]
+  },
+  {
+    "id": "case-threat-route",
+    "domain": 2,
+    "objective": "2.2",
+    "topic": "Impersonation and callback",
+    "prompt": "A purchasing officer gets a voice message and an email asking to change a supplier’s bank details. Both provide the same callback number. Which verification has the most independent evidentiary value?",
+    "options": [
+      {
+        "text": "Call the number already on file in the approved vendor record",
+        "explanation": "That contact path predates the suspicious request."
+      },
+      {
+        "text": "Call the matching number in both new messages",
+        "explanation": "Both requests could originate with the same impersonator."
+      },
+      {
+        "text": "Reply to the originating email and request confirmation",
+        "explanation": "A compromised mailbox could also answer the confirmation."
+      },
+      {
+        "text": "Compare the two messages for consistent invoice numbers",
+        "explanation": "Copied transaction details can make both messages look consistent."
+      }
+    ],
+    "correct": [
+      0
+    ]
+  },
+  {
+    "id": "case-compensate",
+    "domain": 2,
+    "objective": "2.5",
+    "topic": "Legacy system isolation",
+    "prompt": "A vendor will patch a production controller next month. It needs to communicate only with one management station. Which TWO changes most directly reduce network exposure during the wait? Select TWO.",
+    "options": [
+      {
+        "text": "Place the controller in a restricted network segment",
+        "explanation": "Segmentation gives defenders a boundary at which to limit reachability."
+      },
+      {
+        "text": "Increase retention on the controller’s event logs",
+        "explanation": "Retention helps investigation without preventing network access."
+      },
+      {
+        "text": "Permit only the required management traffic across the boundary",
+        "explanation": "An allow rule scoped to the required peer and service restricts access."
+      },
+      {
+        "text": "Lower the backup interval from weekly to daily",
+        "explanation": "Backups assist recovery rather than reducing reachable paths."
+      },
+      {
+        "text": "Review operator accounts at the next quarterly meeting",
+        "explanation": "Deferred review does not reduce current network exposure."
+      }
+    ],
+    "correct": [
+      0,
+      2
+    ]
+  },
+  {
+    "id": "case-indicator-limit",
+    "domain": 2,
+    "objective": "2.4",
+    "topic": "Meaning of an IDS alert",
+    "prompt": "A passive sensor reports a signature match. The target application records a rejected request at the same timestamp. Which conclusion best fits the available evidence?",
+    "options": [
+      {
+        "text": "A matching request reached the application and the application logged a rejection",
+        "explanation": "The two sources together support this claim within their observed scope."
+      },
+      {
+        "text": "The sensor prevented the request before it reached the target",
+        "explanation": "A passive sensor records traffic, and the target logged the request."
+      },
+      {
+        "text": "The target executed the request successfully before rejecting it",
+        "explanation": "A rejection entry alone does not establish execution."
+      },
+      {
+        "text": "The signature was false because the application returned an error",
+        "explanation": "A genuine malicious attempt can fail."
+      }
+    ],
+    "correct": [
+      0
+    ]
+  },
+  {
+    "id": "case-cloud-scope",
+    "domain": 3,
+    "objective": "3.1",
+    "topic": "Cloud responsibility",
+    "prompt": "A team moves its database from a self-managed VM to a managed database service. The provider explicitly owns engine patching. Which task is still the customer’s responsibility under the stated migration?",
+    "options": [
+      {
+        "text": "Reviewing which application identities can read customer tables",
+        "explanation": "The customer still governs its data and entitlements."
+      },
+      {
+        "text": "Installing security fixes into the provider-managed engine",
+        "explanation": "The service agreement explicitly assigns engine patches to the provider."
+      },
+      {
+        "text": "Replacing failed disks in provider storage nodes",
+        "explanation": "The provider operates the physical infrastructure."
+      },
+      {
+        "text": "Patching the hypervisor that hosts the database",
+        "explanation": "The service provider owns its underlying platform."
+      }
+    ],
+    "correct": [
+      0
+    ]
+  },
+  {
+    "id": "case-sensor-path",
+    "domain": 3,
+    "objective": "3.2",
+    "topic": "Inline and passive controls",
+    "prompt": "The network team needs an appliance that can drop malicious sessions without changing endpoint configuration. A second tool must capture a copy of the traffic even when its own analysis service stops. Which pairing meets those placement requirements?",
+    "options": [
+      {
+        "text": "Inline IPS and a passive capture sensor on a network tap",
+        "explanation": "The IPS can act on traversing traffic, while the tap provides a copy independent of the sensor application."
+      },
+      {
+        "text": "Passive IDS and a capture sensor inline as the only forwarding path",
+        "explanation": "The passive IDS cannot directly drop the observed connection."
+      },
+      {
+        "text": "Inline load balancer and a passive IPS on a mirror port",
+        "explanation": "Mirrored packets cannot be used to block the original flow in that configuration."
+      },
+      {
+        "text": "Tap-connected packet analyzer and an out-of-band IDS",
+        "explanation": "Both observe copies and neither can directly drop the original session."
+      }
+    ],
+    "correct": [
+      0
+    ]
+  },
+  {
+    "id": "case-backup-order",
+    "domain": 3,
+    "objective": "3.4",
+    "topic": "Incremental restoration",
+    "prompt": "A system has a full Sunday backup, incrementals on Monday and Tuesday, and no later copies. Which set is required to restore through Tuesday?",
+    "options": [
+      {
+        "text": "Sunday full plus Monday and Tuesday incrementals in order",
+        "explanation": "Each incremental depends on the changes since its predecessor."
+      },
+      {
+        "text": "Sunday full plus Tuesday incremental only",
+        "explanation": "Tuesday lacks changes captured only on Monday."
+      },
+      {
+        "text": "Monday and Tuesday incrementals without the full backup",
+        "explanation": "The baseline is missing."
+      },
+      {
+        "text": "Tuesday incremental only",
+        "explanation": "An incremental is not a complete system image."
+      }
+    ],
+    "correct": [
+      0
+    ]
+  },
+  {
+    "id": "case-token-vault",
+    "domain": 3,
+    "objective": "3.3",
+    "topic": "Tokenization",
+    "prompt": "A billing platform must refer a refund to the original payment account. Only the payment service may recover the account number. Which design best supports the requirement?",
+    "options": [
+      {
+        "text": "Issue random tokens and restrict access to the token mapping",
+        "explanation": "The payment service can resolve authorized tokens without distributing account numbers."
+      },
+      {
+        "text": "Hash account numbers without a lookup and discard the originals",
+        "explanation": "A one-way digest alone does not let the authorized service recover an account number."
+      },
+      {
+        "text": "Display all but the final four digits to billing operators",
+        "explanation": "Masking changes presentation and still discloses part of the account number."
+      },
+      {
+        "text": "Encrypt the table and give billing operators the decryption key",
+        "explanation": "Billing staff would gain a recovery capability reserved for the payment service."
+      }
+    ],
+    "correct": [
+      0
+    ]
+  },
+  {
+    "id": "case-ot-zone",
+    "domain": 3,
+    "objective": "3.2",
+    "topic": "Operational technology access",
+    "prompt": "A plant requires time-limited vendor maintenance on one controller. The controller cannot run an endpoint agent. Which TWO controls best limit the maintenance path? Select TWO.",
+    "options": [
+      {
+        "text": "Provide the vendor a shared account on the engineering LAN",
+        "explanation": "A shared account weakens attribution and broad LAN access increases reach."
+      },
+      {
+        "text": "Require vendor sessions through a controlled jump host",
+        "explanation": "The jump host provides a single restricted entry and observation point."
+      },
+      {
+        "text": "Mirror the controller port to a passive sensor as the sole access control",
+        "explanation": "A sensor can observe the session but does not restrict the route."
+      },
+      {
+        "text": "Add a firewall rule limited to the approved path and maintenance window",
+        "explanation": "The rule limits the destination, source and time of access."
+      },
+      {
+        "text": "Extend the corporate VPN route to every control subnet",
+        "explanation": "That grants substantially more reachability than required."
+      }
+    ],
+    "correct": [
+      1,
+      3
+    ]
+  },
+  {
+    "id": "case-power-bridge",
+    "domain": 3,
+    "objective": "3.4",
+    "topic": "Power continuity",
+    "prompt": "A generator needs 45 seconds to start. The service must continue through the transition and a four-hour utility failure. Which TWO capabilities address different parts of this requirement? Select TWO.",
+    "options": [
+      {
+        "text": "A UPS sized to bridge transfer and startup",
+        "explanation": "Stored power covers the interval before generation is available."
+      },
+      {
+        "text": "A second switch on the same unprotected power strip",
+        "explanation": "Redundant switching does not supply power during the gap."
+      },
+      {
+        "text": "A generator sized and fueled for the outage",
+        "explanation": "The generator supplies sustained power after startup."
+      },
+      {
+        "text": "A daily full backup stored offsite",
+        "explanation": "It protects data but does not keep the service operating during transfer."
+      },
+      {
+        "text": "A second power cable on the same utility feed",
+        "explanation": "The same feed is lost in the stated failure."
+      }
+    ],
+    "correct": [
+      0,
+      2
+    ]
+  },
+  {
+    "id": "case-sanitization",
+    "domain": 4,
+    "objective": "4.2",
+    "topic": "Media disposal evidence",
+    "prompt": "A vendor returns a list of destroyed drive serial numbers. Two decommissioned drives from the company inventory do not appear on it. Which action best supports a defensible disposal record?",
+    "options": [
+      {
+        "text": "Reconcile the missing serials against custody and vendor records",
+        "explanation": "Resolve the discrepancy before claiming complete destruction."
+      },
+      {
+        "text": "Close the disposal record using the model numbers of the missing drives",
+        "explanation": "Model numbers need not uniquely identify individual drives."
+      },
+      {
+        "text": "Treat the original pickup request as evidence of destruction",
+        "explanation": "A request does not verify outcome or custody."
+      },
+      {
+        "text": "Record the two drives as destroyed on the pickup date",
+        "explanation": "This inserts an outcome that has not been verified."
+      }
+    ],
+    "correct": [
+      0
+    ]
+  },
+  {
+    "id": "case-flow-v-pcap",
+    "domain": 4,
+    "objective": "4.9",
+    "topic": "Network evidence selection",
+    "prompt": "A security analyst has a flow record for a large TLS transfer. Which TWO claims can the flow record support when these fields are present? Select TWO.",
+    "options": [
+      {
+        "text": "The recorded source and destination addresses",
+        "explanation": "Flow metadata identifies observed network endpoints."
+      },
+      {
+        "text": "The contents of the confidential document",
+        "explanation": "Flow records do not contain a decrypted application payload."
+      },
+      {
+        "text": "An approximate volume of traffic for the recorded flow",
+        "explanation": "Recorded byte counts support a volume estimate at the observation point."
+      },
+      {
+        "text": "The identity of the human at the keyboard",
+        "explanation": "An IP or flow does not uniquely identify a person."
+      },
+      {
+        "text": "The process on the originating endpoint",
+        "explanation": "Process provenance requires endpoint or equivalent correlated telemetry."
+      }
+    ],
+    "correct": [
+      0,
+      2
+    ]
+  },
+  {
+    "id": "case-edr-closure",
+    "domain": 4,
+    "objective": "4.8",
+    "topic": "Incident recovery validation",
+    "prompt": "A response team removed an unapproved remote-access tool and restored the workstation. Which evidence best supports returning it to production?",
+    "options": [
+      {
+        "text": "Verified clean configuration and expected behavior under monitoring",
+        "explanation": "Recovery requires validation of the restored service and evidence that the issue is addressed."
+      },
+      {
+        "text": "A completed removal ticket without a follow-up check",
+        "explanation": "Administrative closure does not establish technical recovery."
+      },
+      {
+        "text": "A successful boot into the recovered operating system",
+        "explanation": "A successful boot alone does not validate security posture."
+      },
+      {
+        "text": "A firewall rule blocking one observed peer address",
+        "explanation": "That single containment step may leave other paths or persistence."
+      }
+    ],
+    "correct": [
+      0
+    ]
+  },
+  {
+    "id": "case-identity-drop",
+    "domain": 4,
+    "objective": "4.6",
+    "topic": "Identity lifecycle",
+    "prompt": "A contractor’s SSO account is disabled at 17:00. At 17:25 a SaaS application accepts an API token independently issued by that application. What should the responder do first to stop that access?",
+    "options": [
+      {
+        "text": "Revoke the application-issued token and verify rejection",
+        "explanation": "The application accepts that credential independently of the disabled SSO account."
+      },
+      {
+        "text": "Rotate the contractor’s old directory password again",
+        "explanation": "It is not the credential presented to the application."
+      },
+      {
+        "text": "Shorten the SSO login page timeout",
+        "explanation": "An existing application-issued token does not require that page."
+      },
+      {
+        "text": "Change the directory display name on the account",
+        "explanation": "A display label does not revoke a credential."
+      }
+    ],
+    "correct": [
+      0
+    ]
+  },
+  {
+    "id": "case-scanner-view",
+    "domain": 4,
+    "objective": "4.3",
+    "topic": "Verifying remediation",
+    "prompt": "An authenticated scan identified a vulnerable local package. A later unauthenticated scan reports no open ports. What is the strongest next check for closure?",
+    "options": [
+      {
+        "text": "Recheck the installed version using authenticated inventory",
+        "explanation": "It verifies the specific condition that produced the original finding."
+      },
+      {
+        "text": "Treat the empty port list as proof the package was patched",
+        "explanation": "Service exposure and installed software version are different facts."
+      },
+      {
+        "text": "Raise scanning frequency from the same external perspective",
+        "explanation": "Repeated observations from that vantage do not verify the installed version."
+      },
+      {
+        "text": "Compare the number of findings on an unrelated host",
+        "explanation": "That comparison does not validate this asset."
+      }
+    ],
+    "correct": [
+      0
+    ]
+  },
+  {
+    "id": "case-router-notify",
+    "domain": 4,
+    "objective": "4.4",
+    "topic": "SNMP traps versus flow data",
+    "prompt": "The SOC wants immediate reports when an interface changes state and a separate record of which peers exchanged the most bytes that day. Which pairing best matches those requirements?",
+    "options": [
+      {
+        "text": "SNMP traps for state changes and flow records for traffic totals",
+        "explanation": "These sources provide different telemetry for the two questions."
+      },
+      {
+        "text": "Flow records for state changes and SNMP traps for byte totals by peer",
+        "explanation": "Flows describe conversations, while state-change traps report events."
+      },
+      {
+        "text": "DNS query logs for link state and packet counts for account ownership",
+        "explanation": "Neither choice addresses the requested pair of measurements."
+      },
+      {
+        "text": "Configuration backups for link state and system uptime for peer totals",
+        "explanation": "These records do not capture the two required event types."
+      }
+    ],
+    "correct": [
+      0
+    ]
+  },
+  {
+    "id": "case-playbook",
+    "domain": 4,
+    "objective": "4.7",
+    "topic": "Automated response validation",
+    "prompt": "A playbook sometimes receives the same alert twice after a network timeout. Which design best prevents duplicate containment tickets while preserving retries?",
+    "options": [
+      {
+        "text": "Use the alert ID to check for and update the existing ticket",
+        "explanation": "A stable identifier allows the same event to be processed safely on retry."
+      },
+      {
+        "text": "Create a fresh ticket ID for every delivery attempt",
+        "explanation": "That makes retries look like separate events."
+      },
+      {
+        "text": "Disable all retries when a request times out",
+        "explanation": "A real event can then be lost when a request never reached the destination."
+      },
+      {
+        "text": "Group every alert from the same host into a single permanent ticket",
+        "explanation": "Different incidents on the same host could be merged incorrectly."
+      }
+    ],
+    "correct": [
+      0
+    ]
+  },
+  {
+    "id": "case-trusted-endpoint",
+    "domain": 4,
+    "objective": "4.5",
+    "topic": "Endpoint enforcement",
+    "prompt": "The SOC wants to isolate one laptop from ordinary network traffic and preserve communication with the response console. Which capability best fits?",
+    "options": [
+      {
+        "text": "EDR network isolation with its management channel retained",
+        "explanation": "The endpoint can restrict connectivity while remaining available to responders."
+      },
+      {
+        "text": "A SIEM correlation rule that marks the host high severity",
+        "explanation": "A detection rule identifies or prioritizes activity without isolating the endpoint."
+      },
+      {
+        "text": "A passive IDS signature for the endpoint IP",
+        "explanation": "Passive observation does not enforce isolation."
+      },
+      {
+        "text": "A deny rule only on the Internet perimeter router",
+        "explanation": "It may leave lateral traffic on the local network unaffected."
+      }
+    ],
+    "correct": [
+      0
+    ]
+  },
+  {
+    "id": "case-mfa-methods",
+    "domain": 4,
+    "objective": "4.6",
+    "topic": "Authentication factors",
+    "prompt": "A facility uses an employee badge plus a PIN. A proposal adds a second PIN and calls it a third factor. Which assessment is correct?",
+    "options": [
+      {
+        "text": "The two PINs belong to the same knowledge factor",
+        "explanation": "Adding another knowledge secret does not add a different factor type."
+      },
+      {
+        "text": "The badge and both PINs supply three distinct factors",
+        "explanation": "The two PINs represent the same type of evidence."
+      },
+      {
+        "text": "The badge is a biometric factor because it is personalized",
+        "explanation": "A carried badge is possession evidence."
+      },
+      {
+        "text": "PINs are possession factors because they are entered on a keypad",
+        "explanation": "The keypad is an input device; knowing the secret is the factor."
+      }
+    ],
+    "correct": [
+      0
+    ]
+  },
+  {
+    "id": "case-privacy-role",
+    "domain": 5,
+    "objective": "5.4",
+    "topic": "Data roles and privacy",
+    "prompt": "A company determines why customer data is collected. A hosted service processes it only under the company’s documented instructions. Which role describes the hosted service?",
+    "options": [
+      {
+        "text": "Data processor",
+        "explanation": "The service processes data on behalf of the decision maker under instructions."
+      },
+      {
+        "text": "Data controller",
+        "explanation": "The controller determines the purposes and means of processing."
+      },
+      {
+        "text": "Data subject",
+        "explanation": "The subject is the identifiable person the data describes."
+      },
+      {
+        "text": "Data protection officer",
+        "explanation": "That role oversees privacy obligations and does not describe the service relationship."
+      }
+    ],
+    "correct": [
+      0
+    ]
+  },
+  {
+    "id": "case-risk-log",
+    "domain": 5,
+    "objective": "5.2",
+    "topic": "Risk register and ownership",
+    "prompt": "A project records a residual risk after mitigation. Which TWO entries make follow-up and escalation actionable? Select TWO.",
+    "options": [
+      {
+        "text": "Named risk owner",
+        "explanation": "Ownership identifies who is accountable for monitoring and disposition."
+      },
+      {
+        "text": "A new asset serial number unrelated to the affected service",
+        "explanation": "This does not identify responsibility or an escalation trigger."
+      },
+      {
+        "text": "An assertion that mitigation eliminates all uncertainty",
+        "explanation": "Residual risk remains by definition."
+      },
+      {
+        "text": "A threshold that triggers review",
+        "explanation": "A defined threshold tells the owner when to reassess or escalate."
+      },
+      {
+        "text": "A duplicate copy of the risk description with no date or owner",
+        "explanation": "Duplication does not establish a decision process."
+      }
+    ],
+    "correct": [
+      0,
+      3
+    ]
+  },
+  {
+    "id": "case-audit-period",
+    "domain": 5,
+    "objective": "5.5",
+    "topic": "Evidence of operating effectiveness",
+    "prompt": "The audit objective is to establish whether managers reviewed privileged access every quarter for a full year. Which artifact best answers it?",
+    "options": [
+      {
+        "text": "Dated review decisions and exception follow-up for all four quarters",
+        "explanation": "These records show execution across the entire audit period."
+      },
+      {
+        "text": "The current policy requiring a quarterly review",
+        "explanation": "The policy shows control design rather than execution."
+      },
+      {
+        "text": "A clean group membership list exported today",
+        "explanation": "One point-in-time snapshot cannot establish four reviews."
+      },
+      {
+        "text": "The workflow configuration created before the year began",
+        "explanation": "Configuration shows expected operation, not completed reviews."
+      }
+    ],
+    "correct": [
+      0
+    ]
+  },
+  {
+    "id": "case-vendor-change",
+    "domain": 5,
+    "objective": "5.3",
+    "topic": "Third-party monitoring",
+    "prompt": "A supplier passed procurement review last year. It now wants to move customer records to a new subprocessor in another country. Which action best addresses the change before transfer?",
+    "options": [
+      {
+        "text": "Review the new processing scope against the contract and data requirements",
+        "explanation": "The proposed processor and geography change the risk and contractual facts."
+      },
+      {
+        "text": "Accept the transfer based on last year’s unchanged assurance report",
+        "explanation": "Its scope may not cover the new arrangement."
+      },
+      {
+        "text": "Cancel the contract before examining its change terms",
+        "explanation": "The agreement may specify a suitable authorization and review process."
+      },
+      {
+        "text": "Approve after confirming that the supplier still uses encryption",
+        "explanation": "Encryption alone does not resolve scope, rights or residency."
+      }
+    ],
+    "correct": [
+      0
+    ]
+  },
+  {
+    "id": "case-training-metric",
+    "domain": 5,
+    "objective": "5.6",
+    "topic": "Awareness program measurement",
+    "prompt": "Three teams completed phishing training. Which measure most directly tracks whether employees alert responders sooner after receiving a simulation?",
+    "options": [
+      {
+        "text": "Median time from message delivery to the employee report",
+        "explanation": "This measures the timing of the target behavior directly."
+      },
+      {
+        "text": "Percentage of employees who opened the learning module",
+        "explanation": "Attendance does not measure reporting speed."
+      },
+      {
+        "text": "Number of reports independent of delivery time",
+        "explanation": "A count does not show how quickly staff reported."
+      },
+      {
+        "text": "Number of simulated messages delivered",
+        "explanation": "Delivery volume measures exercise size."
+      }
+    ],
+    "correct": [
+      0
+    ]
+  },
+  {
+    "id": "case-policy-owner",
+    "domain": 5,
+    "objective": "5.1",
+    "topic": "Policy maintenance",
+    "prompt": "A business moves a sensitive operation to another country midyear. The policy owner says the next annual review is eight months away. What is the best governance response?",
+    "options": [
+      {
+        "text": "Trigger a policy review for the material change",
+        "explanation": "A change in operating jurisdiction may affect requirements before the annual date."
+      },
+      {
+        "text": "Change the review date on the existing policy and close the issue",
+        "explanation": "Changing metadata does not assess the new operation."
+      },
+      {
+        "text": "Wait for the annual review even if obligations have changed",
+        "explanation": "A periodic schedule does not address material changes in the meantime."
+      },
+      {
+        "text": "Replace all enterprise policies with the provider’s local handbook",
+        "explanation": "Provider guidance does not establish company governance."
+      }
+    ],
+    "correct": [
+      0
+    ]
+  },
+  {
+    "id": "case-pki-rollover",
+    "domain": 1,
+    "objective": "1.4",
+    "topic": "Certificate issuance and deployment",
+    "prompt": "A site is moving to a new TLS key pair. The CA accepts certificate signing requests (CSRs). Which three actions belong in the issuance and deployment process? Select THREE.",
+    "options": [
+      {
+        "text": "Generate the key pair within the authorized key boundary",
+        "explanation": "The organization can retain custody of the private key while creating a new pair."
+      },
+      {
+        "text": "Attach the private key to the CSR sent to the CA",
+        "explanation": "The CA needs the public key and a signed request, not the private key."
+      },
+      {
+        "text": "Submit a CSR containing the intended public key and requested name",
+        "explanation": "The CSR binds the key and identifying information for CA validation."
+      },
+      {
+        "text": "Publish the private key in the public certificate chain",
+        "explanation": "Clients verify the certificate using public information."
+      },
+      {
+        "text": "Verify the issued certificate against the intended name and key pair",
+        "explanation": "This detects a binding or identity error before serving clients."
+      }
+    ],
+    "correct": [
+      0,
+      2,
+      4
+    ]
+  },
+  {
+    "id": "case-scope-incident",
+    "domain": 2,
+    "objective": "2.4",
+    "topic": "Evidence of malicious activity",
+    "prompt": "A responder sees a burst of account lockouts. Which three observations add direct evidence for a password-spraying hypothesis? Select THREE.",
+    "options": [
+      {
+        "text": "The file server completed its scheduled backup",
+        "explanation": "A backup timestamp alone does not connect to the sign-in pattern."
+      },
+      {
+        "text": "Failures cover dozens of distinct active accounts",
+        "explanation": "Broad account coverage is characteristic of spraying."
+      },
+      {
+        "text": "The affected accounts have different assigned mailboxes",
+        "explanation": "Mailbox assignments alone do not show the source or pattern of failures."
+      },
+      {
+        "text": "Each account received few attempts within the window",
+        "explanation": "Sparse attempts per account distinguish the pattern from concentrated brute force."
+      },
+      {
+        "text": "The same client source appears throughout the authentication failures",
+        "explanation": "A shared source supports correlation, although it does not identify a particular person."
+      }
+    ],
+    "correct": [
+      1,
+      3,
+      4
+    ]
+  },
+  {
+    "id": "case-data-states",
+    "domain": 3,
+    "objective": "3.3",
+    "topic": "Protecting data across its lifecycle",
+    "prompt": "A lender needs confidentiality for archived records and traffic to its portal, and must limit which fields service staff see. Which three measures map directly to these requirements? Select THREE.",
+    "options": [
+      {
+        "text": "Encrypt the archive with controlled decryption keys",
+        "explanation": "This protects stored records if the storage is exposed without the keys."
+      },
+      {
+        "text": "Require authenticated TLS on portal connections",
+        "explanation": "TLS protects data in transit and authenticates the intended service."
+      },
+      {
+        "text": "Publish a checksum alongside every customer file",
+        "explanation": "Hashes detect changes but do not conceal the file."
+      },
+      {
+        "text": "Replicate the archive to a second site",
+        "explanation": "Replication supports availability and creates another copy to protect."
+      },
+      {
+        "text": "Mask restricted fields in the service staff view",
+        "explanation": "Role-specific display masking limits routine exposure of those fields."
+      }
+    ],
+    "correct": [
+      0,
+      1,
+      4
+    ]
+  },
+  {
+    "id": "case-evidence-kit",
+    "domain": 4,
+    "objective": "4.8",
+    "topic": "Forensic acquisition and preservation",
+    "prompt": "An incident handler has approval to acquire a powered-off drive. Which three measures best preserve the original and support later verification of the copy? Select THREE.",
+    "options": [
+      {
+        "text": "Boot the original operating system to confirm the username",
+        "explanation": "Booting may change disk state before acquisition."
+      },
+      {
+        "text": "Use a validated write blocker for acquisition",
+        "explanation": "The blocker protects the source from acquisition-system writes."
+      },
+      {
+        "text": "Record acquisition details and custody transfers",
+        "explanation": "Documentation connects the evidence to people, times and handling decisions."
+      },
+      {
+        "text": "Use matching filenames as the integrity check",
+        "explanation": "Different content can share the same filename."
+      },
+      {
+        "text": "Verify the acquired data using a cryptographic digest",
+        "explanation": "A documented digest comparison supports byte-level integrity verification."
+      }
+    ],
+    "correct": [
+      1,
+      2,
+      4
+    ]
+  },
+  {
+    "id": "case-continuity-impact",
+    "domain": 5,
+    "objective": "5.2",
+    "topic": "Business impact analysis",
+    "prompt": "A business owner is defining recovery priorities. Which three measurements describe the business service’s recovery requirements rather than how it performed during the last outage? Select THREE.",
+    "options": [
+      {
+        "text": "Maximum tolerable downtime",
+        "explanation": "This states the limit the business can tolerate."
+      },
+      {
+        "text": "Measured repair time during the last outage",
+        "explanation": "That is observed performance, not a recovery requirement."
+      },
+      {
+        "text": "Recovery time objective",
+        "explanation": "RTO states the target time to restore service."
+      },
+      {
+        "text": "Recovery point objective",
+        "explanation": "RPO states the tolerated extent of data loss in time."
+      },
+      {
+        "text": "Observed time between the last two failures",
+        "explanation": "This describes historical reliability."
+      }
+    ],
+    "correct": [
+      0,
+      2,
+      3
+    ]
+  }
+]
